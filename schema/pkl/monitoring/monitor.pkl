@@ -1,0 +1,94 @@
+/*
+ * © 2025 Platform Engineering Labs Inc.
+ *
+ * SPDX-License-Identifier: FSL-1.1-ALv2
+ */
+module datadog.monitoring.monitor
+
+import "@formae/formae.pkl"
+import "../datadog.pkl"
+
+const type = "Datadog::Monitoring::Monitor"
+
+open class MonitorResolvable extends formae.Resolvable {
+    hidden type = module.type
+    hidden id: MonitorResolvable = (this) { property = "id" }
+    hidden name: MonitorResolvable = (this) { property = "name" }
+}
+
+/// Monitor threshold configuration.
+@formae.SubResourceHint {}
+class MonitorThresholds extends formae.SubResource {
+    @formae.FieldHint {}
+    critical: Number?
+
+    @formae.FieldHint {}
+    warning: Number?
+
+    @formae.FieldHint {}
+    ok: Number?
+
+    @formae.FieldHint {}
+    criticalRecovery: Number?
+
+    @formae.FieldHint {}
+    warningRecovery: Number?
+}
+
+/// Monitor options configuration.
+@formae.SubResourceHint {}
+class MonitorOptions extends formae.SubResource {
+    @formae.FieldHint {}
+    thresholds: MonitorThresholds?
+
+    @formae.FieldHint {}
+    notifyNoData: Boolean?
+
+    @formae.FieldHint {}
+    timeoutH: Int?
+
+    @formae.FieldHint {}
+    renotifyInterval: Int?
+
+    @formae.FieldHint {}
+    escalationMessage: String?
+
+    @formae.FieldHint {}
+    includeTags: Boolean?
+}
+
+/// Datadog Monitor resource.
+@datadog.ResourceHint {
+    type = module.type
+    identifier = "id"
+}
+open class Monitor extends formae.Resource {
+    fixed hidden type: String = module.type
+
+    @datadog.FieldHint { required = true }
+    name: String
+
+    @datadog.FieldHint { required = true; createOnly = true }
+    monitorType: String
+
+    @datadog.FieldHint { required = true }
+    query: String
+
+    @datadog.FieldHint {}
+    message: String?
+
+    @datadog.FieldHint {}
+    priority: Int?
+
+    @datadog.FieldHint {}
+    tags: Listing<String>?
+
+    @datadog.FieldHint {}
+    options: MonitorOptions?
+
+    hidden parent = this
+    hidden res: MonitorResolvable = new {
+        label = parent.label
+        stack = parent.stack?.label
+    }
+}

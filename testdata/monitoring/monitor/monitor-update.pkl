@@ -1,0 +1,61 @@
+/*
+ * Conformance Test: Update Monitor (in-place)
+ *
+ * This file modifies mutable fields to trigger an in-place update.
+ * Changes from monitor.pkl:
+ *   - name: added "-updated" suffix
+ *   - message: changed text
+ *   - query: changed threshold from 90 to 95
+ *   - tags: added a new tag
+ *   - options.thresholds.critical: changed from 90 to 95
+ *   - options.thresholds.warning: changed from 80 to 85
+ *
+ * These fields do NOT have createOnly=true, so formae should update
+ * the resource in place without replacement.
+ */
+amends "@formae/forma.pkl"
+import "@formae/formae.pkl"
+
+import "@datadog/monitoring/monitor.pkl"
+import "@datadog/datadog.pkl"
+
+local stackName = "plugin-sdk-test-stack"
+local testRunID = read("env:FORMAE_TEST_RUN_ID")
+
+forma {
+  new formae.Stack {
+    label = stackName
+    description = "Plugin SDK conformance test stack"
+  }
+
+  new formae.Target {
+    label = "datadog-target"
+    namespace = "DATADOG"
+    config = new datadog.Config {
+      apiKey = read("env:DD_API_KEY")
+      appKey = read("env:DD_APP_KEY")
+      site = read("env:DD_SITE")
+    }
+  }
+
+  new monitor.Monitor {
+    label = "plugin-sdk-test-monitor"
+    name = "formae-plugin-sdk-test-\(testRunID)-updated"        // CHANGED
+    monitorType = "metric alert"                                 // unchanged (createOnly)
+    query = "avg(last_5m):avg:system.cpu.user{*} > 95"          // CHANGED
+    message = "CPU usage is very high"                           // CHANGED
+    tags = new Listing {
+      "env:test"
+      "managed-by:formae"
+      "updated:true"                                             // ADDED
+    }
+
+    options = new monitor.MonitorOptions {
+      thresholds = new monitor.MonitorThresholds {
+        critical = 95.0                                          // CHANGED from 90
+        warning = 85.0                                           // CHANGED from 80
+      }
+      notifyNoData = false
+    }
+  }
+}

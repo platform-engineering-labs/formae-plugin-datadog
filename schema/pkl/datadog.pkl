@@ -1,0 +1,27 @@
+/*
+ * © 2025 Platform Engineering Labs Inc.
+ *
+ * SPDX-License-Identifier: FSL-1.1-ALv2
+ */
+module datadog
+
+import "@formae/formae.pkl"
+
+/// Datadog target configuration.
+/// ApiKey and AppKey are required for API authentication.
+/// Site defaults to "datadoghq.com" — override for EU or other regions.
+open class Config {
+  hidden fixed type: String = "Datadog"
+  hidden apiKey: String
+  hidden appKey: String
+  hidden site: String = "datadoghq.com"
+
+  fixed Type: String = type
+  fixed ApiKey: String = apiKey
+  fixed AppKey: String = appKey
+  fixed Site: String = site
+}
+
+open class ResourceHint extends formae.ResourceHint {}
+
+open class FieldHint extends formae.FieldHint {}

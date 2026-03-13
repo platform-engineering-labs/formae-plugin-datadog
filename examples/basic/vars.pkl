@@ -1,0 +1,25 @@
+/*
+ * © 2025 Platform Engineering Labs Inc.
+ *
+ * SPDX-License-Identifier: FSL-1.1-ALv2
+ */
+
+import "@formae/formae.pkl"
+import "@datadog/datadog.pkl"
+
+stackName = "datadog-monitoring"
+
+stack: formae.Stack = new {
+    label = stackName
+    description = "Basic Datadog monitoring infrastructure"
+}
+
+target: formae.Target = new formae.Target {
+    label = "datadog-target"
+    namespace = "DATADOG"
+    config = new datadog.Config {
+        apiKey = read("env:DD_API_KEY")
+        appKey = read("env:DD_APP_KEY")
+        site = read("env:DD_SITE")
+    }
+}

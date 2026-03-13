@@ -1,0 +1,44 @@
+/*
+ * © 2025 Platform Engineering Labs Inc.
+ *
+ * SPDX-License-Identifier: FSL-1.1-ALv2
+ */
+
+amends "@formae/forma.pkl"
+import "@formae/formae.pkl"
+
+import "@datadog/monitoring/monitor.pkl"
+
+import "./vars.pkl"
+
+description {
+    text = """
+        Basic Datadog monitoring: a CPU usage alert with warning and critical thresholds.
+        """
+    confirm = true
+}
+
+forma {
+    vars.stack
+    vars.target
+
+    cpuMonitor
+}
+
+local cpuMonitor = new monitor.Monitor {
+    label = "cpu-monitor"
+    name = "High CPU Usage"
+    monitorType = "metric alert"
+    query = "avg(last_5m):avg:system.cpu.user{*} > 90"
+    message = "CPU usage exceeded 90% on {{host.name}}"
+    tags = new Listing { "env:production"; "team:platform" }
+
+    options = new monitor.MonitorOptions {
+        thresholds = new monitor.MonitorThresholds {
+            critical = 90.0
+            warning = 80.0
+        }
+        notifyNoData = true
+        renotifyInterval = 60
+    }
+}

@@ -1,0 +1,14 @@
+amends "pkl:Project"
+
+package {
+  name = "datadog"
+  baseUri = "package://localhost/plugins/datadog/schema/pkl/datadog"
+  version = "0.1.0"
+  packageZipUrl = "https://localhost/plugins/datadog/schema/pkl/datadog@\(version).zip"
+}
+
+dependencies {
+  ["formae"] {
+    uri = "package://hub.platform.engineering/plugins/pkl/schema/pkl/formae/formae@0.82.3"
+  }
+}

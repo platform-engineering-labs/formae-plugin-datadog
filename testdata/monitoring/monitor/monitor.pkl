@@ -1,0 +1,48 @@
+/*
+ * Conformance Test: Create Monitor
+ *
+ * This file defines the initial resource state for conformance testing.
+ * The conformance test harness will apply this file first.
+ */
+amends "@formae/forma.pkl"
+import "@formae/formae.pkl"
+
+import "@datadog/monitoring/monitor.pkl"
+import "@datadog/datadog.pkl"
+
+local stackName = "plugin-sdk-test-stack"
+local testRunID = read("env:FORMAE_TEST_RUN_ID")
+
+forma {
+  new formae.Stack {
+    label = stackName
+    description = "Plugin SDK conformance test stack"
+  }
+
+  new formae.Target {
+    label = "datadog-target"
+    namespace = "DATADOG"
+    config = new datadog.Config {
+      apiKey = read("env:DD_API_KEY")
+      appKey = read("env:DD_APP_KEY")
+      site = read("env:DD_SITE")
+    }
+  }
+
+  new monitor.Monitor {
+    label = "plugin-sdk-test-monitor"
+    name = "formae-plugin-sdk-test-\(testRunID)"
+    monitorType = "metric alert"
+    query = "avg(last_5m):avg:system.cpu.user{*} > 90"
+    message = "CPU usage is high"
+    tags = new Listing { "env:test"; "managed-by:formae" }
+
+    options = new monitor.MonitorOptions {
+      thresholds = new monitor.MonitorThresholds {
+        critical = 90.0
+        warning = 80.0
+      }
+      notifyNoData = false
+    }
+  }
+}
