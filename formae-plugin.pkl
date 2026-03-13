@@ -9,7 +9,7 @@ version = "0.1.0"
 namespace = "DATADOG"
 description = "Datadog monitoring and observability plugin for Formae"
 license = "FSL-1.1-ALv2"
-minFormaeVersion = "0.80.1"
+minFormaeVersion = "0.82.3"
 
 output {
   renderer = new JsonRenderer {}
