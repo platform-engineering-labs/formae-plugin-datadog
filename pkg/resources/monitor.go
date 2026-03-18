@@ -93,7 +93,7 @@ func (m *Monitor) Create(ctx context.Context, request *resource.CreateRequest) (
 				OperationStatus: resource.OperationStatusFailure,
 				ErrorCode:       mapHTTPError(httpResp, err),
 			},
-		}, fmt.Errorf("failed to create monitor: %w", err)
+		}, nil
 	}
 
 	nativeID := int64ToNativeID(resp.GetId())
@@ -120,7 +120,7 @@ func (m *Monitor) Read(ctx context.Context, request *resource.ReadRequest) (*res
 	if err != nil {
 		return &resource.ReadResult{
 			ErrorCode: mapHTTPError(httpResp, err),
-		}, fmt.Errorf("failed to read monitor: %w", err)
+		}, nil
 	}
 
 	propsJSON := marshalMonitorProps(&resp)
@@ -171,7 +171,7 @@ func (m *Monitor) Update(ctx context.Context, request *resource.UpdateRequest) (
 				ErrorCode:       mapHTTPError(httpResp, err),
 				NativeID:        request.NativeID,
 			},
-		}, fmt.Errorf("failed to update monitor: %w", err)
+		}, nil
 	}
 
 	propsJSON := marshalMonitorProps(&resp)
@@ -202,7 +202,7 @@ func (m *Monitor) Delete(ctx context.Context, request *resource.DeleteRequest) (
 				ErrorCode:       mapHTTPError(httpResp, err),
 				NativeID:        request.NativeID,
 			},
-		}, fmt.Errorf("failed to delete monitor: %w", err)
+		}, nil
 	}
 
 	return &resource.DeleteResult{

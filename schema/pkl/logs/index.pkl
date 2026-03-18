@@ -1,0 +1,76 @@
+/*
+ * © 2025 Platform Engineering Labs Inc.
+ *
+ * SPDX-License-Identifier: FSL-1.1-ALv2
+ */
+module datadog.logs.index
+
+import "@formae/formae.pkl"
+import "../datadog.pkl"
+
+const type = "Datadog::Logs::Index"
+
+open class IndexResolvable extends formae.Resolvable {
+    hidden type = module.type
+    hidden name: IndexResolvable = (this) { property = "name" }
+}
+
+/// Log filter configuration.
+@formae.SubResourceHint {}
+class IndexFilter extends formae.SubResource {
+    @formae.FieldHint {}
+    query: String?
+}
+
+/// Exclusion filter for a logs index.
+@formae.SubResourceHint {}
+class ExclusionFilter extends formae.SubResource {
+    @formae.FieldHint {}
+    query: String?
+
+    @formae.FieldHint { required = true }
+    sampleRate: Number
+}
+
+/// Exclusion rule for a logs index.
+@formae.SubResourceHint {}
+class Exclusion extends formae.SubResource {
+    @formae.FieldHint { required = true }
+    name: String
+
+    @formae.FieldHint {}
+    isEnabled: Boolean?
+
+    @formae.FieldHint {}
+    filter: ExclusionFilter?
+}
+
+/// Datadog Logs Index resource.
+@datadog.ResourceHint {
+    type = module.type
+    identifier = "name"
+}
+open class Index extends formae.Resource {
+    fixed hidden type: String = module.type
+
+    @datadog.FieldHint { required = true; createOnly = true }
+    name: String
+
+    @datadog.FieldHint { required = true }
+    filter: IndexFilter
+
+    @datadog.FieldHint {}
+    exclusionFilters: Listing<Exclusion>?
+
+    @datadog.FieldHint {}
+    dailyLimit: Int?
+
+    @datadog.FieldHint {}
+    numRetentionDays: Int?
+
+    hidden parent = this
+    hidden res: IndexResolvable = new {
+        label = parent.label
+        stack = parent.stack?.label
+    }
+}

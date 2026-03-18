@@ -1,0 +1,59 @@
+/*
+ * © 2025 Platform Engineering Labs Inc.
+ *
+ * SPDX-License-Identifier: FSL-1.1-ALv2
+ */
+module datadog.logs.pipeline
+
+import "@formae/formae.pkl"
+import "../datadog.pkl"
+
+const type = "Datadog::Logs::Pipeline"
+
+open class PipelineResolvable extends formae.Resolvable {
+    hidden type = module.type
+    hidden id: PipelineResolvable = (this) { property = "id" }
+    hidden name: PipelineResolvable = (this) { property = "name" }
+}
+
+/// Pipeline filter for matching logs.
+@formae.SubResourceHint {}
+class PipelineFilter extends formae.SubResource {
+    @formae.FieldHint {}
+    query: String?
+}
+
+/// Datadog Logs Pipeline resource.
+///
+/// Pipeline structure (name, filter, isEnabled) uses typed fields.
+/// Processors are stored as raw JSON due to 20+ processor types —
+/// this supports both discovery of existing pipelines and authoring
+/// new ones by providing processor JSON directly.
+@datadog.ResourceHint {
+    type = module.type
+    identifier = "id"
+}
+open class Pipeline extends formae.Resource {
+    fixed hidden type: String = module.type
+
+    @datadog.FieldHint { required = true }
+    name: String
+
+    @datadog.FieldHint {}
+    filter: PipelineFilter?
+
+    @datadog.FieldHint {}
+    isEnabled: Boolean?
+
+    @datadog.FieldHint {}
+    processors: String?
+
+    @datadog.FieldHint {}
+    tags: Listing<String>?
+
+    hidden parent = this
+    hidden res: PipelineResolvable = new {
+        label = parent.label
+        stack = parent.stack?.label
+    }
+}

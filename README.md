@@ -9,6 +9,17 @@ Formae plugin for managing Datadog resources.
 | Resource Type | Description |
 |---------------|-------------|
 | `Datadog::Monitoring::Monitor` | Monitors (metric, query, composite alerts) |
+| `Datadog::Monitoring::SLO` | Service Level Objectives (metric, monitor types) |
+| `Datadog::Monitoring::DowntimeSchedule` | Downtime schedules (one-time, recurring) |
+| `Datadog::Logs::Index` | Logs indexes (filter, exclusion filters, retention) |
+| `Datadog::Logs::Metric` | Log-based metrics (count, distribution aggregations) |
+| `Datadog::Logs::Archive` | Logs archives (S3, GCS, Azure destinations) |
+| `Datadog::IAM::Role` | Custom roles with permission management |
+| `Datadog::IAM::Team` | Teams (name, handle, description) |
+| `Datadog::Security::MonitoringRule` | Security monitoring detection rules |
+| `Datadog::Dashboard::Dashboard` | Dashboards (discovery-first, raw JSON widgets) |
+| `Datadog::Synthetics::Test` | Synthetics API tests (discovery-first, raw JSON config) |
+| `Datadog::Logs::Pipeline` | Logs pipelines (typed fields + raw JSON processors) |
 
 ## Installation
 
@@ -64,6 +75,15 @@ Run against a real Datadog account:
 
 ```bash
 make conformance-test-crud TEST=monitor
+make conformance-test-crud TEST=slo
+make conformance-test-crud TEST=downtime-schedule
+make conformance-test-crud TEST=index
+make conformance-test-crud TEST=logs-metric
+make conformance-test-crud TEST=role
+make conformance-test-crud TEST=team
+make conformance-test-crud TEST=dashboard
+make conformance-test-crud TEST=synthetics-test
+make conformance-test-crud TEST=pipeline
 ```
 
 ## License

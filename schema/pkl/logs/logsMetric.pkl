@@ -1,0 +1,73 @@
+/*
+ * © 2025 Platform Engineering Labs Inc.
+ *
+ * SPDX-License-Identifier: FSL-1.1-ALv2
+ */
+module datadog.logs.logsMetric
+
+import "@formae/formae.pkl"
+import "../datadog.pkl"
+
+const type = "Datadog::Logs::Metric"
+
+open class LogsMetricResolvable extends formae.Resolvable {
+    hidden type = module.type
+    hidden metricId: LogsMetricResolvable = (this) { property = "metricId" }
+}
+
+/// Compute configuration for log-based metric.
+@formae.SubResourceHint {}
+class LogsMetricCompute extends formae.SubResource {
+    @formae.FieldHint { required = true; createOnly = true }
+    aggregationType: String
+
+    @formae.FieldHint {}
+    path: String?
+
+    @formae.FieldHint {}
+    includePercentiles: Boolean?
+}
+
+/// Filter for logs to aggregate.
+@formae.SubResourceHint {}
+class LogsMetricFilter extends formae.SubResource {
+    @formae.FieldHint {}
+    query: String?
+}
+
+/// Group by rule for log-based metric.
+@formae.SubResourceHint {}
+class LogsMetricGroupBy extends formae.SubResource {
+    @formae.FieldHint { required = true }
+    path: String
+
+    @formae.FieldHint {}
+    tagName: String?
+}
+
+/// Datadog Logs Metric resource.
+@datadog.ResourceHint {
+    type = module.type
+    identifier = "metricId"
+}
+open class LogsMetric extends formae.Resource {
+    fixed hidden type: String = module.type
+
+    @datadog.FieldHint { required = true; createOnly = true }
+    metricId: String
+
+    @datadog.FieldHint { required = true }
+    compute: LogsMetricCompute
+
+    @datadog.FieldHint {}
+    filter: LogsMetricFilter?
+
+    @datadog.FieldHint {}
+    groupBy: Listing<LogsMetricGroupBy>?
+
+    hidden parent = this
+    hidden res: LogsMetricResolvable = new {
+        label = parent.label
+        stack = parent.stack?.label
+    }
+}

@@ -7,6 +7,7 @@ package resources
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/platform-engineering-labs/formae/pkg/plugin/resource"
 )
@@ -60,4 +61,9 @@ func int64ToNativeID(id int64) string {
 // nativeIDToInt64 converts a string NativeID to an int64 ID.
 func nativeIDToInt64(nativeID string) (int64, error) {
 	return strconv.ParseInt(nativeID, 10, 64)
+}
+
+// parseISO8601 parses an ISO-8601 datetime string.
+func parseISO8601(s string) (time.Time, error) {
+	return time.Parse(time.RFC3339, s)
 }

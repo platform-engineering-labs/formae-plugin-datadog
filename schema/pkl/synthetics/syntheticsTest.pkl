@@ -1,0 +1,61 @@
+/*
+ * © 2025 Platform Engineering Labs Inc.
+ *
+ * SPDX-License-Identifier: FSL-1.1-ALv2
+ */
+module datadog.synthetics.syntheticsTest
+
+import "@formae/formae.pkl"
+import "../datadog.pkl"
+
+const type = "Datadog::Synthetics::Test"
+
+open class SyntheticsTestResolvable extends formae.Resolvable {
+    hidden type = module.type
+    hidden publicId: SyntheticsTestResolvable = (this) { property = "publicId" }
+    hidden name: SyntheticsTestResolvable = (this) { property = "name" }
+}
+
+/// Datadog Synthetics Test resource.
+///
+/// Discovery-first resource: test config and options are stored as raw JSON
+/// to faithfully capture existing tests created via the Datadog UI recorder
+/// or step builder. The typed fields (name, message, testType) support
+/// basic identification and management.
+@datadog.ResourceHint {
+    type = module.type
+    identifier = "publicId"
+}
+open class SyntheticsTest extends formae.Resource {
+    fixed hidden type: String = module.type
+
+    @datadog.FieldHint { required = true }
+    name: String
+
+    @datadog.FieldHint { required = true }
+    testType: String
+
+    @datadog.FieldHint { required = true }
+    message: String
+
+    @datadog.FieldHint {}
+    status: String?
+
+    @datadog.FieldHint {}
+    tags: Listing<String>?
+
+    @datadog.FieldHint {}
+    locations: Listing<String>?
+
+    @datadog.FieldHint {}
+    config: String?
+
+    @datadog.FieldHint {}
+    options: String?
+
+    hidden parent = this
+    hidden res: SyntheticsTestResolvable = new {
+        label = parent.label
+        stack = parent.stack?.label
+    }
+}

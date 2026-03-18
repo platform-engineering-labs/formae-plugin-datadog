@@ -1,0 +1,123 @@
+/*
+ * © 2025 Platform Engineering Labs Inc.
+ *
+ * SPDX-License-Identifier: FSL-1.1-ALv2
+ */
+module datadog.security.monitoringRule
+
+import "@formae/formae.pkl"
+import "../datadog.pkl"
+
+const type = "Datadog::Security::MonitoringRule"
+
+open class MonitoringRuleResolvable extends formae.Resolvable {
+    hidden type = module.type
+    hidden id: MonitoringRuleResolvable = (this) { property = "id" }
+    hidden name: MonitoringRuleResolvable = (this) { property = "name" }
+}
+
+/// A detection rule case (threshold/condition that triggers a signal).
+@formae.SubResourceHint {}
+class RuleCase extends formae.SubResource {
+    @formae.FieldHint { required = true }
+    status: String
+
+    @formae.FieldHint {}
+    name: String?
+
+    @formae.FieldHint {}
+    condition: String?
+
+    @formae.FieldHint {}
+    notifications: Listing<String>?
+}
+
+/// A query that defines what logs to evaluate.
+@formae.SubResourceHint {}
+class RuleQuery extends formae.SubResource {
+    @formae.FieldHint { required = true }
+    query: String
+
+    @formae.FieldHint {}
+    name: String?
+
+    @formae.FieldHint {}
+    aggregation: String?
+
+    @formae.FieldHint {}
+    groupByFields: Listing<String>?
+
+    @formae.FieldHint {}
+    distinctFields: Listing<String>?
+}
+
+/// Detection rule options.
+@formae.SubResourceHint {}
+class RuleOptions extends formae.SubResource {
+    @formae.FieldHint {}
+    detectionMethod: String?
+
+    @formae.FieldHint {}
+    evaluationWindow: Number?
+
+    @formae.FieldHint {}
+    keepAlive: Number?
+
+    @formae.FieldHint {}
+    maxSignalDuration: Number?
+
+    @formae.FieldHint {}
+    decreaseCriticalityBasedOnEnv: Boolean?
+}
+
+/// A suppression filter.
+@formae.SubResourceHint {}
+class RuleFilter extends formae.SubResource {
+    @formae.FieldHint { required = true }
+    query: String
+
+    @formae.FieldHint { required = true }
+    action: String
+}
+
+/// Datadog Security Monitoring Rule resource.
+@datadog.ResourceHint {
+    type = module.type
+    identifier = "id"
+}
+open class MonitoringRule extends formae.Resource {
+    fixed hidden type: String = module.type
+
+    @datadog.FieldHint { required = true }
+    name: String
+
+    @datadog.FieldHint { required = true }
+    message: String
+
+    @datadog.FieldHint { required = true }
+    cases: Listing<RuleCase>
+
+    @datadog.FieldHint { required = true }
+    queries: Listing<RuleQuery>
+
+    @datadog.FieldHint {}
+    options: RuleOptions?
+
+    @datadog.FieldHint {}
+    isEnabled: Boolean?
+
+    @datadog.FieldHint { createOnly = true }
+    ruleType: String?
+
+    @datadog.FieldHint {}
+    tags: Listing<String>?
+
+    @datadog.FieldHint {}
+    filters: Listing<RuleFilter>?
+
+    hidden parent = this
+    hidden res: MonitoringRuleResolvable = new {
+        label = parent.label
+        stack = parent.stack?.label
+    }
+}

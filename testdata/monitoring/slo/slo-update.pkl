@@ -1,0 +1,64 @@
+/*
+ * Conformance Test: Update SLO (in-place)
+ *
+ * This file modifies mutable fields to trigger an in-place update.
+ * Changes from slo.pkl:
+ *   - name: added "-updated" suffix
+ *   - description: changed text
+ *   - tags: added a new tag
+ *   - thresholds[0].target: changed from 99.0 to 99.5
+ *   - thresholds[0].warning: changed from 99.5 to 99.9
+ *
+ * These fields do NOT have createOnly=true, so formae should update
+ * the resource in place without replacement.
+ */
+amends "@formae/forma.pkl"
+import "@formae/formae.pkl"
+
+import "@datadog/monitoring/slo.pkl"
+import "@datadog/datadog.pkl"
+
+local stackName = "plugin-sdk-test-stack"
+local testRunID = read("env:FORMAE_TEST_RUN_ID")
+
+forma {
+  new formae.Stack {
+    label = stackName
+    description = "Plugin SDK conformance test stack"
+  }
+
+  new formae.Target {
+    label = "datadog-target"
+    namespace = "DATADOG"
+    config = new datadog.Config {
+      apiKey = read("env:DD_API_KEY")
+      appKey = read("env:DD_APP_KEY")
+      site = read("env:DD_SITE")
+    }
+  }
+
+  new slo.Slo {
+    label = "plugin-sdk-test-slo"
+    name = "formae-plugin-sdk-test-slo-\(testRunID)-updated"         // CHANGED
+    sloType = "metric"                                                // unchanged (createOnly)
+    description = "Updated conformance test SLO"                      // CHANGED
+    tags = new Listing {
+      "env:test"
+      "managed-by:formae"
+      "updated:true"                                                   // ADDED
+    }
+
+    thresholds = new Listing {
+      new slo.SloThreshold {
+        target = 99.5                                                  // CHANGED from 99.0
+        timeframe = "7d"
+        warning = 99.9                                                 // CHANGED from 99.5
+      }
+    }
+
+    query = new slo.SloQuery {
+      numerator = "sum:my.metric.good{*}.as_count()"
+      denominator = "sum:my.metric.total{*}.as_count()"
+    }
+  }
+}

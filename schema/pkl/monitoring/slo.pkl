@@ -1,0 +1,76 @@
+/*
+ * © 2025 Platform Engineering Labs Inc.
+ *
+ * SPDX-License-Identifier: FSL-1.1-ALv2
+ */
+module datadog.monitoring.slo
+
+import "@formae/formae.pkl"
+import "../datadog.pkl"
+
+const type = "Datadog::Monitoring::SLO"
+
+open class SloResolvable extends formae.Resolvable {
+    hidden type = module.type
+    hidden id: SloResolvable = (this) { property = "id" }
+    hidden name: SloResolvable = (this) { property = "name" }
+}
+
+/// SLO threshold for a specific timeframe.
+@formae.SubResourceHint {}
+class SloThreshold extends formae.SubResource {
+    @formae.FieldHint { required = true }
+    target: Number
+
+    @formae.FieldHint { required = true }
+    timeframe: String
+
+    @formae.FieldHint {}
+    warning: Number?
+}
+
+/// Metric-based SLO query (numerator/denominator).
+@formae.SubResourceHint {}
+class SloQuery extends formae.SubResource {
+    @formae.FieldHint { required = true }
+    numerator: String
+
+    @formae.FieldHint { required = true }
+    denominator: String
+}
+
+/// Datadog Service Level Objective resource.
+@datadog.ResourceHint {
+    type = module.type
+    identifier = "id"
+}
+open class Slo extends formae.Resource {
+    fixed hidden type: String = module.type
+
+    @datadog.FieldHint { required = true }
+    name: String
+
+    @datadog.FieldHint { required = true; createOnly = true }
+    sloType: String
+
+    @datadog.FieldHint { required = true }
+    thresholds: Listing<SloThreshold>
+
+    @datadog.FieldHint {}
+    description: String?
+
+    @datadog.FieldHint {}
+    tags: Listing<String>?
+
+    @datadog.FieldHint {}
+    query: SloQuery?
+
+    @datadog.FieldHint {}
+    monitorIds: Listing<Int>?
+
+    hidden parent = this
+    hidden res: SloResolvable = new {
+        label = parent.label
+        stack = parent.stack?.label
+    }
+}

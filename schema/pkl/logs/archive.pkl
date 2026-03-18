@@ -1,0 +1,125 @@
+/*
+ * © 2025 Platform Engineering Labs Inc.
+ *
+ * SPDX-License-Identifier: FSL-1.1-ALv2
+ */
+module datadog.logs.archive
+
+import "@formae/formae.pkl"
+import "../datadog.pkl"
+
+const type = "Datadog::Logs::Archive"
+
+open class ArchiveResolvable extends formae.Resolvable {
+    hidden type = module.type
+    hidden id: ArchiveResolvable = (this) { property = "id" }
+    hidden name: ArchiveResolvable = (this) { property = "name" }
+}
+
+/// S3 integration credentials.
+@formae.SubResourceHint {}
+class S3Integration extends formae.SubResource {
+    @formae.FieldHint { required = true }
+    accountId: String
+
+    @formae.FieldHint { required = true }
+    roleName: String
+}
+
+/// S3 destination for logs archive.
+@formae.SubResourceHint {}
+class S3Destination extends formae.SubResource {
+    @formae.FieldHint { required = true }
+    bucket: String
+
+    @formae.FieldHint { required = true }
+    integration: S3Integration
+
+    @formae.FieldHint {}
+    path: String?
+}
+
+/// GCS integration credentials.
+@formae.SubResourceHint {}
+class GCSIntegration extends formae.SubResource {
+    @formae.FieldHint { required = true }
+    clientEmail: String
+
+    @formae.FieldHint {}
+    projectId: String?
+}
+
+/// GCS destination for logs archive.
+@formae.SubResourceHint {}
+class GCSDestination extends formae.SubResource {
+    @formae.FieldHint { required = true }
+    bucket: String
+
+    @formae.FieldHint { required = true }
+    integration: GCSIntegration
+
+    @formae.FieldHint {}
+    path: String?
+}
+
+/// Azure integration credentials.
+@formae.SubResourceHint {}
+class AzureIntegration extends formae.SubResource {
+    @formae.FieldHint { required = true }
+    clientId: String
+
+    @formae.FieldHint { required = true }
+    tenantId: String
+}
+
+/// Azure destination for logs archive.
+@formae.SubResourceHint {}
+class AzureDestination extends formae.SubResource {
+    @formae.FieldHint { required = true }
+    container: String
+
+    @formae.FieldHint { required = true }
+    storageAccount: String
+
+    @formae.FieldHint { required = true }
+    integration: AzureIntegration
+
+    @formae.FieldHint {}
+    path: String?
+}
+
+/// Datadog Logs Archive resource.
+@datadog.ResourceHint {
+    type = module.type
+    identifier = "id"
+}
+open class Archive extends formae.Resource {
+    fixed hidden type: String = module.type
+
+    @datadog.FieldHint { required = true }
+    name: String
+
+    @datadog.FieldHint { required = true }
+    query: String
+
+    @datadog.FieldHint {}
+    includeTags: Boolean?
+
+    @datadog.FieldHint {}
+    rehydrationTags: Listing<String>?
+
+    @datadog.FieldHint {}
+    s3Destination: S3Destination?
+
+    @datadog.FieldHint {}
+    gcsDestination: GCSDestination?
+
+    @datadog.FieldHint {}
+    azureDestination: AzureDestination?
+
+    hidden parent = this
+    hidden res: ArchiveResolvable = new {
+        label = parent.label
+        stack = parent.stack?.label
+    }
+}

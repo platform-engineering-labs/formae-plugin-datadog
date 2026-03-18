@@ -8,12 +8,14 @@ amends "@formae/forma.pkl"
 import "@formae/formae.pkl"
 
 import "@datadog/monitoring/monitor.pkl"
+import "@datadog/monitoring/slo.pkl"
+import "@datadog/monitoring/downtimeSchedule.pkl"
 
 import "./vars.pkl"
 
 description {
     text = """
-        Basic Datadog monitoring: a CPU usage alert with warning and critical thresholds.
+        Datadog monitoring: CPU alert, SLO tracking, and maintenance downtime.
         """
     confirm = true
 }
@@ -23,6 +25,8 @@ forma {
     vars.target
 
     cpuMonitor
+    cpuSlo
+    maintenanceDowntime
 }
 
 local cpuMonitor = new monitor.Monitor {
@@ -40,5 +44,43 @@ local cpuMonitor = new monitor.Monitor {
         }
         notifyNoData = true
         renotifyInterval = 60
+    }
+}
+
+local cpuSlo = new slo.Slo {
+    label = "cpu-slo"
+    name = "CPU Usage SLO"
+    sloType = "metric"
+    description = "Maintain CPU usage below 90% threshold"
+    tags = new Listing { "env:production"; "team:platform" }
+
+    thresholds = new Listing {
+        new slo.SloThreshold {
+            target = 99.0
+            timeframe = "30d"
+            warning = 99.5
+        }
+    }
+
+    query = new slo.SloQuery {
+        numerator = "sum:system.cpu.user{*}.as_count() - sum:system.cpu.user{*}.as_count().rollup(max, 300)"
+        denominator = "sum:system.cpu.user{*}.as_count()"
+    }
+}
+
+local maintenanceDowntime = new downtimeSchedule.DowntimeSchedule {
+    label = "maintenance-window"
+    scope = "env:production"
+    monitorTags = new Listing { "team:platform" }
+    message = "Scheduled maintenance window — suppressing alerts"
+
+    recurringSchedule = new downtimeSchedule.RecurringSchedule {
+        timezone = "America/New_York"
+        recurrences = new Listing {
+            new downtimeSchedule.RecurrenceDefinition {
+                duration = "2h"
+                rrule = "FREQ=WEEKLY;BYDAY=SU;BYHOUR=2;BYMINUTE=0"
+            }
+        }
     }
 }

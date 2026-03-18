@@ -1,0 +1,48 @@
+/*
+ * Conformance Test: Create Downtime Schedule
+ *
+ * This file defines the initial resource state for conformance testing.
+ * The conformance test harness will apply this file first.
+ */
+amends "@formae/forma.pkl"
+import "@formae/formae.pkl"
+
+import "@datadog/monitoring/downtimeSchedule.pkl"
+import "@datadog/datadog.pkl"
+
+local stackName = "plugin-sdk-test-stack"
+local testRunID = read("env:FORMAE_TEST_RUN_ID")
+
+forma {
+  new formae.Stack {
+    label = stackName
+    description = "Plugin SDK conformance test stack"
+  }
+
+  new formae.Target {
+    label = "datadog-target"
+    namespace = "DATADOG"
+    config = new datadog.Config {
+      apiKey = read("env:DD_API_KEY")
+      appKey = read("env:DD_APP_KEY")
+      site = read("env:DD_SITE")
+    }
+  }
+
+  new downtimeSchedule.DowntimeSchedule {
+    label = "plugin-sdk-test-downtime-\(testRunID)"
+    scope = "*"
+    monitorTags = new Listing { "*" }
+    message = "formae-plugin-sdk-test-\(testRunID) downtime"
+
+    recurringSchedule = new downtimeSchedule.RecurringSchedule {
+      timezone = "UTC"
+      recurrences = new Listing {
+        new downtimeSchedule.RecurrenceDefinition {
+          duration = "1h"
+          rrule = "FREQ=DAILY"
+        }
+      }
+    }
+  }
+}

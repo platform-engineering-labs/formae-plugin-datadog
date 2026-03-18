@@ -81,6 +81,15 @@ jobs:
       matrix:
         resource:
           - monitor
+          - slo
+          - downtime-schedule
+          - index
+          - logs-metric
+          - role
+          - team
+          - dashboard
+          - synthetics-test
+          - pipeline
 
     steps:
       - name: Checkout
