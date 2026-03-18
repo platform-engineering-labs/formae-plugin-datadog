@@ -38,17 +38,26 @@ func deleteLogsIndex(ctx context.Context, prov *LogsIndex, nativeID string) {
 // take a few seconds to become readable.
 func waitForIndexPropagation(t *testing.T, ctx context.Context, prov *LogsIndex, nativeID string) {
 	t.Helper()
-	for i := 0; i < 10; i++ {
+	// Require multiple consecutive successful reads to confirm propagation.
+	// The Datadog Logs Index API has severe eventual consistency — a read can
+	// succeed once and then fail on the very next call.
+	consecutiveOK := 0
+	for i := 0; i < 15; i++ {
 		result, err := prov.Read(ctx, &resource.ReadRequest{
 			NativeID:     nativeID,
 			ResourceType: ResourceTypeLogsIndex,
 		})
 		if err == nil && result.ErrorCode == "" {
-			return
+			consecutiveOK++
+			if consecutiveOK >= 3 {
+				return
+			}
+		} else {
+			consecutiveOK = 0
 		}
 		time.Sleep(time.Second)
 	}
-	t.Fatalf("Index %s did not propagate within 10 seconds", nativeID)
+	t.Fatalf("Index %s did not propagate within 15 seconds", nativeID)
 }
 
 // createSpareIndex creates a second index to ensure our test index isn't
