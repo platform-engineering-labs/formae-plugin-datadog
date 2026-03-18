@@ -168,18 +168,25 @@ func TestDowntimeSchedule_List(t *testing.T) {
 	nativeID := createResult.ProgressResult.NativeID
 	t.Cleanup(func() { deleteDowntime(ctx, prov, nativeID) })
 
-	listResult, err := prov.List(ctx, &resource.ListRequest{
-		ResourceType: ResourceTypeDowntimeSchedule,
-	})
-	require.NoError(t, err)
-	assert.NotEmpty(t, listResult.NativeIDs)
-
-	found := false
-	for _, id := range listResult.NativeIDs {
-		if id == nativeID {
-			found = true
+	// Retry List — Datadog API has eventual consistency,
+	// so the newly created downtime may take a moment to appear.
+	var found bool
+	var listResult *resource.ListResult
+	for i := 0; i < 10; i++ {
+		listResult, err = prov.List(ctx, &resource.ListRequest{
+			ResourceType: ResourceTypeDowntimeSchedule,
+		})
+		require.NoError(t, err)
+		for _, id := range listResult.NativeIDs {
+			if id == nativeID {
+				found = true
+				break
+			}
+		}
+		if found {
 			break
 		}
+		time.Sleep(time.Second)
 	}
 	assert.True(t, found, "Created downtime %s should appear in List results", nativeID)
 	t.Logf("List returned %d downtimes", len(listResult.NativeIDs))

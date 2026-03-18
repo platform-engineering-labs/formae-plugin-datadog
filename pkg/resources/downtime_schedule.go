@@ -243,15 +243,14 @@ func (d *DowntimeSchedule) Status(_ context.Context, request *resource.StatusReq
 
 func (d *DowntimeSchedule) List(ctx context.Context, _ *resource.ListRequest) (*resource.ListResult, error) {
 	api := datadogV2.NewDowntimesApi(d.Client.ApiClient)
-	resp, httpResp, err := api.ListDowntimes(d.Client.Ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to list downtimes: %w (status: %d)", err, httpResp.StatusCode)
-	}
-
-	data := resp.GetData()
-	nativeIDs := make([]string, 0, len(data))
-	for _, dt := range data {
-		nativeIDs = append(nativeIDs, dt.GetId())
+	var nativeIDs []string
+	items, cancel := api.ListDowntimesWithPagination(d.Client.Ctx)
+	defer cancel()
+	for item := range items {
+		if item.Error != nil {
+			return nil, fmt.Errorf("failed to list downtimes: %w", item.Error)
+		}
+		nativeIDs = append(nativeIDs, item.Item.GetId())
 	}
 
 	return &resource.ListResult{
