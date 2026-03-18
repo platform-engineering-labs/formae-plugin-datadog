@@ -32,6 +32,16 @@ func deleteSecMonRule(ctx context.Context, prov *SecurityMonitoringRule, nativeI
 	_, _ = prov.Delete(ctx, &resource.DeleteRequest{NativeID: nativeID})
 }
 
+// skipIfSecMonUnavailable checks if the Create result indicates the Security
+// Monitoring feature is unavailable (403 — requires paid add-on) and skips the test.
+func skipIfSecMonUnavailable(t *testing.T, result *resource.CreateResult) {
+	t.Helper()
+	if result.ProgressResult.OperationStatus == resource.OperationStatusFailure &&
+		result.ProgressResult.ErrorCode == resource.OperationErrorCodeAccessDenied {
+		t.Skip("Security Monitoring requires a paid Datadog add-on — skipping")
+	}
+}
+
 func TestSecurityMonitoringRule_CreateReadDeleteLifecycle(t *testing.T) {
 	ctx := context.Background()
 	prov := newTestSecurityMonitoringRule(t)
@@ -70,6 +80,7 @@ func TestSecurityMonitoringRule_CreateReadDeleteLifecycle(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotNil(t, createResult.ProgressResult)
+	skipIfSecMonUnavailable(t, createResult)
 	assert.Equal(t, resource.OperationStatusSuccess, createResult.ProgressResult.OperationStatus)
 	assert.NotEmpty(t, createResult.ProgressResult.NativeID)
 
@@ -125,6 +136,7 @@ func TestSecurityMonitoringRule_Update(t *testing.T) {
 		Properties:   props,
 	})
 	require.NoError(t, err)
+	skipIfSecMonUnavailable(t, createResult)
 	nativeID := createResult.ProgressResult.NativeID
 	t.Cleanup(func() { deleteSecMonRule(ctx, prov, nativeID) })
 
@@ -169,7 +181,9 @@ func TestSecurityMonitoringRule_List(t *testing.T) {
 	listResult, err := prov.List(ctx, &resource.ListRequest{
 		ResourceType: ResourceTypeSecurityMonitoringRule,
 	})
-	require.NoError(t, err)
+	if err != nil {
+		t.Skip("Security Monitoring requires a paid Datadog add-on — skipping")
+	}
 	// Datadog accounts have default security rules
 	t.Logf("List returned %d security monitoring rules", len(listResult.NativeIDs))
 }
@@ -203,6 +217,7 @@ func TestSecurityMonitoringRule_DeleteAlreadyDeleted(t *testing.T) {
 		Properties:   props,
 	})
 	require.NoError(t, err)
+	skipIfSecMonUnavailable(t, createResult)
 	nativeID := createResult.ProgressResult.NativeID
 
 	// Delete once

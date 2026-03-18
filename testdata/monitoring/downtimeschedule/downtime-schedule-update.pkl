@@ -5,10 +5,10 @@
  * Changes from downtime-schedule.pkl:
  *   - scope: changed from "*" to "env:staging"
  *   - message: changed text
- *   - recurringSchedule.recurrences[0].duration: changed from "1h" to "2h"
- *   - recurringSchedule.recurrences[0].rrule: changed to weekly
  *
- * No fields have createOnly=true, so formae should update in place.
+ * Note: recurringSchedule is kept identical to the create file because
+ * Datadog rejects schedule changes on in-progress downtimes with
+ * "Start times of downtimes in progress cannot be changed".
  */
 amends "@formae/forma.pkl"
 import "@formae/formae.pkl"
@@ -45,8 +45,8 @@ forma {
       timezone = "UTC"
       recurrences = new Listing {
         new downtimeSchedule.RecurrenceDefinition {
-          duration = "2h"                                              // CHANGED from "1h"
-          rrule = "FREQ=WEEKLY;BYDAY=MO"                              // CHANGED from "FREQ=DAILY"
+          duration = "1h"
+          rrule = "FREQ=DAILY"
         }
       }
     }

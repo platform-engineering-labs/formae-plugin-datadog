@@ -111,17 +111,13 @@ func TestDowntimeSchedule_Update(t *testing.T) {
 	nativeID := createResult.ProgressResult.NativeID
 	t.Cleanup(func() { deleteDowntime(ctx, prov, nativeID) })
 
-	// Update
+	// Update — only change non-schedule fields (scope, message).
+	// Datadog rejects schedule changes on in-progress downtimes with
+	// "Start times of downtimes in progress cannot be changed".
 	desiredProps, _ := json.Marshal(downtimeProps{
 		Scope:       "env:staging",
 		MonitorTags: []string{"*"},
 		Message:     stringPtr("Updated downtime message"),
-		RecurringSchedule: &recurringSchedProps{
-			Timezone: stringPtr("UTC"),
-			Recurrences: []recurrenceProps{
-				{Duration: "2h", Rrule: "FREQ=WEEKLY;BYDAY=MO"},
-			},
-		},
 	})
 
 	updateResult, err := prov.Update(ctx, &resource.UpdateRequest{
@@ -130,7 +126,10 @@ func TestDowntimeSchedule_Update(t *testing.T) {
 		DesiredProperties: desiredProps,
 	})
 	require.NoError(t, err)
-	assert.Equal(t, resource.OperationStatusSuccess, updateResult.ProgressResult.OperationStatus)
+	if updateResult.ProgressResult.OperationStatus == resource.OperationStatusFailure {
+		t.Logf("Update failed with error code: %s", updateResult.ProgressResult.ErrorCode)
+	}
+	require.Equal(t, resource.OperationStatusSuccess, updateResult.ProgressResult.OperationStatus)
 
 	// Verify update
 	readResult, err := prov.Read(ctx, &resource.ReadRequest{

@@ -39,11 +39,11 @@ func deleteLogsIndex(ctx context.Context, prov *LogsIndex, nativeID string) {
 func waitForIndexPropagation(t *testing.T, ctx context.Context, prov *LogsIndex, nativeID string) {
 	t.Helper()
 	for i := 0; i < 10; i++ {
-		_, err := prov.Read(ctx, &resource.ReadRequest{
+		result, err := prov.Read(ctx, &resource.ReadRequest{
 			NativeID:     nativeID,
 			ResourceType: ResourceTypeLogsIndex,
 		})
-		if err == nil {
+		if err == nil && result.ErrorCode == "" {
 			return
 		}
 		time.Sleep(time.Second)
@@ -208,18 +208,25 @@ func TestLogsIndex_List(t *testing.T) {
 		deleteLogsIndex(ctx, prov, spareID)
 	})
 
-	listResult, err := prov.List(ctx, &resource.ListRequest{
-		ResourceType: ResourceTypeLogsIndex,
-	})
-	require.NoError(t, err)
-	assert.NotEmpty(t, listResult.NativeIDs)
-
-	found := false
-	for _, id := range listResult.NativeIDs {
-		if id == nativeID {
-			found = true
+	// Retry List — Datadog Logs Index API has eventual consistency,
+	// so the newly created index may take a few seconds to appear.
+	var found bool
+	var listResult *resource.ListResult
+	for i := 0; i < 10; i++ {
+		listResult, err = prov.List(ctx, &resource.ListRequest{
+			ResourceType: ResourceTypeLogsIndex,
+		})
+		require.NoError(t, err)
+		for _, id := range listResult.NativeIDs {
+			if id == nativeID {
+				found = true
+				break
+			}
+		}
+		if found {
 			break
 		}
+		time.Sleep(time.Second)
 	}
 	assert.True(t, found, "Created logs index %s should appear in List results", nativeID)
 	t.Logf("List returned %d indexes", len(listResult.NativeIDs))
