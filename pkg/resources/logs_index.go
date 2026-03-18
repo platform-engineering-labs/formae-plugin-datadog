@@ -150,7 +150,7 @@ func (l *LogsIndex) Delete(ctx context.Context, request *resource.DeleteRequest)
 	httpResp, err := api.DeleteLogsIndex(l.Client.Ctx, request.NativeID)
 	// Datadog returns 403 (not 404) when deleting an already-deleted index.
 	// Treat both as idempotent success.
-	if err != nil && !isDeleteSuccessError(httpResp) && !(httpResp != nil && httpResp.StatusCode == 403) {
+	if err != nil && !isDeleteSuccessError(httpResp) && (httpResp == nil || httpResp.StatusCode != 403) {
 		return &resource.DeleteResult{
 			ProgressResult: &resource.ProgressResult{
 				Operation:       resource.OperationDelete,

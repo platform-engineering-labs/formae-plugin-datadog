@@ -128,7 +128,7 @@ func (l *LogsPipeline) Update(ctx context.Context, request *resource.UpdateReque
 func (l *LogsPipeline) Delete(ctx context.Context, request *resource.DeleteRequest) (*resource.DeleteResult, error) {
 	api := datadogV1.NewLogsPipelinesApi(l.Client.ApiClient)
 	httpResp, err := api.DeleteLogsPipeline(l.Client.Ctx, request.NativeID)
-	if err != nil && !isDeleteSuccessError(httpResp) && !(httpResp != nil && httpResp.StatusCode == 400) {
+	if err != nil && !isDeleteSuccessError(httpResp) && (httpResp == nil || httpResp.StatusCode != 400) {
 		return &resource.DeleteResult{
 			ProgressResult: &resource.ProgressResult{
 				Operation:       resource.OperationDelete,
