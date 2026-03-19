@@ -125,12 +125,13 @@ func TestMonitor_CreateReadDeleteLifecycle(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, resource.OperationStatusSuccess, deleteResult.ProgressResult.OperationStatus)
 
-	// Verify gone
-	_, err = prov.Read(ctx, &resource.ReadRequest{
+	// Verify gone — Read returns (result, nil) with ErrorCode set, not (nil, error)
+	goneResult, err := prov.Read(ctx, &resource.ReadRequest{
 		NativeID:     nativeID,
 		ResourceType: ResourceTypeMonitor,
 	})
-	assert.Error(t, err)
+	require.NoError(t, err)
+	assert.NotEmpty(t, goneResult.ErrorCode, "Read after delete should return an error code")
 }
 
 func TestMonitor_Update(t *testing.T) {

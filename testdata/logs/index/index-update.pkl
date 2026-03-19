@@ -1,0 +1,51 @@
+/*
+ * Conformance Test: Update Logs Index
+ *
+ * This file defines the updated resource state. The conformance test
+ * harness will apply this after the initial create, then verify properties match.
+ */
+amends "@formae/forma.pkl"
+import "@formae/formae.pkl"
+
+import "@datadog/logs/index.pkl"
+import "@datadog/datadog.pkl"
+
+local stackName = "plugin-sdk-test-stack"
+local testRunID = read("env:FORMAE_TEST_RUN_ID")
+
+forma {
+  new formae.Stack {
+    label = stackName
+    description = "Plugin SDK conformance test stack"
+  }
+
+  new formae.Target {
+    label = "datadog-target"
+    namespace = "DATADOG"
+    config = new datadog.Config {
+      apiKey = read("env:DD_API_KEY")
+      appKey = read("env:DD_APP_KEY")
+      site = read("env:DD_SITE")
+    }
+  }
+
+  new index.Index {
+    label = "plugin-sdk-test-index"
+    name = "formae-plugin-sdk-test-\(testRunID)"
+
+    filter = new index.IndexFilter {
+      query = "source:test OR source:api"
+    }
+
+    exclusionFilters = new Listing {
+      new index.Exclusion {
+        name = "exclude-debug"
+        isEnabled = true
+        filter = new index.ExclusionFilter {
+          query = "status:debug"
+          sampleRate = 1.0
+        }
+      }
+    }
+  }
+}

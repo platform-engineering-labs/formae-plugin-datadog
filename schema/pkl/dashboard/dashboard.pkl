@@ -1,0 +1,51 @@
+/*
+ * © 2025 Platform Engineering Labs Inc.
+ *
+ * SPDX-License-Identifier: FSL-1.1-ALv2
+ */
+module datadog.dashboard.dashboard
+
+import "@formae/formae.pkl"
+import "../datadog.pkl"
+
+const type = "Datadog::Dashboard::Dashboard"
+
+open class DashboardResolvable extends formae.Resolvable {
+    hidden type = module.type
+    hidden id: DashboardResolvable = (this) { property = "id" }
+    hidden title: DashboardResolvable = (this) { property = "title" }
+}
+
+/// Datadog Dashboard resource.
+///
+/// Discovery-first resource: widgets are stored as raw JSON to faithfully
+/// capture existing dashboards created via the Datadog UI. The typed fields
+/// (title, description, layoutType) support authoring common dashboard shells.
+@datadog.ResourceHint {
+    type = module.type
+    identifier = "id"
+}
+open class Dashboard extends formae.Resource {
+    fixed hidden type: String = module.type
+
+    @datadog.FieldHint { required = true }
+    title: String
+
+    @datadog.FieldHint { required = true }
+    layoutType: String
+
+    @datadog.FieldHint {}
+    description: String?
+
+    @datadog.FieldHint {}
+    tags: Listing<String>?
+
+    @datadog.FieldHint {}
+    widgets: String?
+
+    hidden parent = this
+    hidden res: DashboardResolvable = new {
+        label = parent.label
+        stack = parent.stack?.label
+    }
+}

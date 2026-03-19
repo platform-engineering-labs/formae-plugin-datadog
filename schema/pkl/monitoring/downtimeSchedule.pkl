@@ -1,0 +1,85 @@
+/*
+ * © 2025 Platform Engineering Labs Inc.
+ *
+ * SPDX-License-Identifier: FSL-1.1-ALv2
+ */
+module datadog.monitoring.downtimeSchedule
+
+import "@formae/formae.pkl"
+import "../datadog.pkl"
+
+const type = "Datadog::Monitoring::DowntimeSchedule"
+
+open class DowntimeScheduleResolvable extends formae.Resolvable {
+    hidden type = module.type
+    hidden id: DowntimeScheduleResolvable = (this) { property = "id" }
+}
+
+/// One-time schedule definition.
+@formae.SubResourceHint {}
+class OneTimeSchedule extends formae.SubResource {
+    @formae.FieldHint {}
+    start: String?
+
+    @formae.FieldHint {}
+    end: String?
+}
+
+/// Recurrence definition using RRULE.
+@formae.SubResourceHint {}
+class RecurrenceDefinition extends formae.SubResource {
+    @formae.FieldHint { required = true }
+    duration: String
+
+    @formae.FieldHint { required = true }
+    rrule: String
+
+    @formae.FieldHint {}
+    start: String?
+}
+
+/// Recurring schedule definition.
+@formae.SubResourceHint {}
+class RecurringSchedule extends formae.SubResource {
+    @formae.FieldHint { required = true }
+    recurrences: Listing<RecurrenceDefinition>
+
+    @formae.FieldHint {}
+    timezone: String?
+}
+
+/// Datadog Downtime Schedule resource.
+@datadog.ResourceHint {
+    type = module.type
+    identifier = "id"
+}
+open class DowntimeSchedule extends formae.Resource {
+    fixed hidden type: String = module.type
+
+    @datadog.FieldHint { required = true }
+    scope: String
+
+    @datadog.FieldHint { required = true }
+    monitorTags: Listing<String>
+
+    @datadog.FieldHint {}
+    message: String?
+
+    @datadog.FieldHint {}
+    muteFirstRecoveryNotification: Boolean?
+
+    @datadog.FieldHint {}
+    displayTimezone: String?
+
+    @datadog.FieldHint {}
+    oneTimeSchedule: OneTimeSchedule?
+
+    @datadog.FieldHint {}
+    recurringSchedule: RecurringSchedule?
+
+    hidden parent = this
+    hidden res: DowntimeScheduleResolvable = new {
+        label = parent.label
+        stack = parent.stack?.label
+    }
+}

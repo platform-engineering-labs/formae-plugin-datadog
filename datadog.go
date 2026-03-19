@@ -26,7 +26,7 @@ var _ plugin.ResourcePlugin = &Plugin{}
 func (p *Plugin) RateLimit() plugin.RateLimitConfig {
 	return plugin.RateLimitConfig{
 		Scope:                            plugin.RateLimitScopeNamespace,
-		MaxRequestsPerSecondForNamespace: 5,
+		MaxRequestsPerSecondForNamespace: 3,
 	}
 }
 

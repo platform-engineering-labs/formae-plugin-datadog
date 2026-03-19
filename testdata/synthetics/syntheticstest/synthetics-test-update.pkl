@@ -1,0 +1,45 @@
+/*
+ * Conformance Test: Update Synthetics Test (in-place)
+ *
+ * Changes from synthetics-test.pkl:
+ *   - name: added "-updated" suffix
+ *   - message: changed text
+ *   - tags: added
+ */
+amends "@formae/forma.pkl"
+import "@formae/formae.pkl"
+
+import "@datadog/synthetics/syntheticsTest.pkl"
+import "@datadog/datadog.pkl"
+
+local stackName = "plugin-sdk-test-stack"
+local testRunID = read("env:FORMAE_TEST_RUN_ID")
+
+forma {
+  new formae.Stack {
+    label = stackName
+    description = "Plugin SDK conformance test stack"
+  }
+
+  new formae.Target {
+    label = "datadog-target"
+    namespace = "DATADOG"
+    config = new datadog.Config {
+      apiKey = read("env:DD_API_KEY")
+      appKey = read("env:DD_APP_KEY")
+      site = read("env:DD_SITE")
+    }
+  }
+
+  new syntheticsTest.SyntheticsTest {
+    label = "plugin-sdk-test-synthetics"
+    name = "formae-plugin-sdk-test-\(testRunID)-updated"           // CHANGED
+    testType = "api"
+    message = "Updated conformance test synthetics"                 // CHANGED
+    status = "paused"
+    locations = new Listing { "aws:us-east-1" }
+    config = #"{"assertions":[{"operator":"is","target":200,"type":"statusCode"}],"request":{"method":"GET","url":"https://httpbin.org/get"}}"#
+    options = #"{"tick_every":900}"#
+    tags = new Listing { "env:test"; "managed-by:formae" }          // ADDED
+  }
+}

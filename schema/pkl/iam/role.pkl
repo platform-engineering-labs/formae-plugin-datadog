@@ -1,0 +1,38 @@
+/*
+ * © 2025 Platform Engineering Labs Inc.
+ *
+ * SPDX-License-Identifier: FSL-1.1-ALv2
+ */
+module datadog.iam.role
+
+import "@formae/formae.pkl"
+import "../datadog.pkl"
+
+const type = "Datadog::IAM::Role"
+
+open class RoleResolvable extends formae.Resolvable {
+    hidden type = module.type
+    hidden id: RoleResolvable = (this) { property = "id" }
+    hidden name: RoleResolvable = (this) { property = "name" }
+}
+
+/// Datadog Role resource.
+@datadog.ResourceHint {
+    type = module.type
+    identifier = "id"
+}
+open class Role extends formae.Resource {
+    fixed hidden type: String = module.type
+
+    @datadog.FieldHint { required = true }
+    name: String
+
+    @datadog.FieldHint {}
+    permissions: Listing<String>?
+
+    hidden parent = this
+    hidden res: RoleResolvable = new {
+        label = parent.label
+        stack = parent.stack?.label
+    }
+}

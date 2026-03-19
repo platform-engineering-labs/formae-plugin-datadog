@@ -1,0 +1,37 @@
+/*
+ * Conformance Test: Create Dashboard
+ *
+ * This file defines the initial resource state for conformance testing.
+ * The conformance test harness will apply this file first.
+ */
+amends "@formae/forma.pkl"
+import "@formae/formae.pkl"
+
+import "@datadog/dashboard/dashboard.pkl"
+import "@datadog/datadog.pkl"
+
+local stackName = "plugin-sdk-test-stack"
+local testRunID = read("env:FORMAE_TEST_RUN_ID")
+
+forma {
+  new formae.Stack {
+    label = stackName
+    description = "Plugin SDK conformance test stack"
+  }
+
+  new formae.Target {
+    label = "datadog-target"
+    namespace = "DATADOG"
+    config = new datadog.Config {
+      apiKey = read("env:DD_API_KEY")
+      appKey = read("env:DD_APP_KEY")
+      site = read("env:DD_SITE")
+    }
+  }
+
+  new dashboard.Dashboard {
+    label = "plugin-sdk-test-dashboard"
+    title = "formae-plugin-sdk-test-\(testRunID)"
+    layoutType = "ordered"
+  }
+}

@@ -1,0 +1,42 @@
+/*
+ * © 2025 Platform Engineering Labs Inc.
+ *
+ * SPDX-License-Identifier: FSL-1.1-ALv2
+ */
+module datadog.iam.team
+
+import "@formae/formae.pkl"
+import "../datadog.pkl"
+
+const type = "Datadog::IAM::Team"
+
+open class TeamResolvable extends formae.Resolvable {
+    hidden type = module.type
+    hidden id: TeamResolvable = (this) { property = "id" }
+    hidden name: TeamResolvable = (this) { property = "name" }
+    hidden handle: TeamResolvable = (this) { property = "handle" }
+}
+
+/// Datadog Team resource.
+@datadog.ResourceHint {
+    type = module.type
+    identifier = "id"
+}
+open class Team extends formae.Resource {
+    fixed hidden type: String = module.type
+
+    @datadog.FieldHint { required = true }
+    name: String
+
+    @datadog.FieldHint { required = true }
+    handle: String
+
+    @datadog.FieldHint {}
+    description: String?
+
+    hidden parent = this
+    hidden res: TeamResolvable = new {
+        label = parent.label
+        stack = parent.stack?.label
+    }
+}

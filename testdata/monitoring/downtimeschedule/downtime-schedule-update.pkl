@@ -1,0 +1,54 @@
+/*
+ * Conformance Test: Update Downtime Schedule (in-place)
+ *
+ * This file modifies mutable fields to trigger an in-place update.
+ * Changes from downtime-schedule.pkl:
+ *   - scope: changed from "*" to "env:staging"
+ *   - message: changed text
+ *
+ * Note: recurringSchedule is kept identical to the create file because
+ * Datadog rejects schedule changes on in-progress downtimes with
+ * "Start times of downtimes in progress cannot be changed".
+ */
+amends "@formae/forma.pkl"
+import "@formae/formae.pkl"
+
+import "@datadog/monitoring/downtimeSchedule.pkl"
+import "@datadog/datadog.pkl"
+
+local stackName = "plugin-sdk-test-stack"
+local testRunID = read("env:FORMAE_TEST_RUN_ID")
+
+forma {
+  new formae.Stack {
+    label = stackName
+    description = "Plugin SDK conformance test stack"
+  }
+
+  new formae.Target {
+    label = "datadog-target"
+    namespace = "DATADOG"
+    config = new datadog.Config {
+      apiKey = read("env:DD_API_KEY")
+      appKey = read("env:DD_APP_KEY")
+      site = read("env:DD_SITE")
+    }
+  }
+
+  new downtimeSchedule.DowntimeSchedule {
+    label = "plugin-sdk-test-downtime-\(testRunID)"
+    scope = "env:staging"                                              // CHANGED
+    monitorTags = new Listing { "*" }
+    message = "formae-plugin-sdk-test-\(testRunID) downtime updated"  // CHANGED
+
+    recurringSchedule = new downtimeSchedule.RecurringSchedule {
+      timezone = "UTC"
+      recurrences = new Listing {
+        new downtimeSchedule.RecurrenceDefinition {
+          duration = "1h"
+          rrule = "FREQ=DAILY"
+        }
+      }
+    }
+  }
+}
