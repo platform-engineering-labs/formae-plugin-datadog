@@ -241,7 +241,7 @@ func marshalSyntheticsAPITestProps(test *datadogV1.SyntheticsAPITest) json.RawMe
 		props.Status = &s
 	}
 	if len(test.Tags) > 0 {
-		props.Tags = test.Tags
+		props.Tags = sortedTags(test.Tags)
 	}
 	if len(test.Locations) > 0 {
 		props.Locations = test.Locations

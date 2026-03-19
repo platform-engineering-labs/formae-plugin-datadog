@@ -302,7 +302,7 @@ func marshalMonitorProps(mon *datadogV1.Monitor) json.RawMessage {
 		props.Priority = mon.Priority.Get()
 	}
 	if len(mon.Tags) > 0 {
-		props.Tags = mon.Tags
+		props.Tags = sortedTags(mon.Tags)
 	}
 
 	if mon.Options != nil {

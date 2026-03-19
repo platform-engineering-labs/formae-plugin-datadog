@@ -216,7 +216,7 @@ func marshalDashboardProps(db *datadogV1.Dashboard) json.RawMessage {
 	}
 
 	if tags, ok := db.GetTagsOk(); ok && tags != nil {
-		props.Tags = *tags
+		props.Tags = sortedTags(*tags)
 	}
 
 	// Serialize widgets back to raw JSON

@@ -459,7 +459,7 @@ func marshalStandardRuleResponse(std *datadogV2.SecurityMonitoringStandardRuleRe
 	}
 
 	if len(std.Tags) > 0 {
-		props.Tags = std.Tags
+		props.Tags = sortedTags(std.Tags)
 	}
 
 	for _, f := range std.GetFilters() {
@@ -495,7 +495,7 @@ func marshalSignalRuleResponse(sig *datadogV2.SecurityMonitoringSignalRuleRespon
 	}
 
 	if len(sig.Tags) > 0 {
-		props.Tags = sig.Tags
+		props.Tags = sortedTags(sig.Tags)
 	}
 
 	d, _ := json.Marshal(props)

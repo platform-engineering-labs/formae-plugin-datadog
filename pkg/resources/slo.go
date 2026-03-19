@@ -277,7 +277,7 @@ func marshalSloProps(slo *datadogV1.ServiceLevelObjective) json.RawMessage {
 		props.Description = slo.Description.Get()
 	}
 	if len(slo.Tags) > 0 {
-		props.Tags = slo.Tags
+		props.Tags = sortedTags(slo.Tags)
 	}
 	if slo.Query != nil {
 		props.Query = &sloQueryProps{
@@ -323,7 +323,7 @@ func marshalSloResponseData(data *datadogV1.SLOResponseData) json.RawMessage {
 		props.Description = data.Description.Get()
 	}
 	if len(data.Tags) > 0 {
-		props.Tags = data.Tags
+		props.Tags = sortedTags(data.Tags)
 	}
 	if data.Query != nil {
 		props.Query = &sloQueryProps{

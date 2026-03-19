@@ -215,7 +215,7 @@ func marshalLogsPipelineProps(pipeline *datadogV1.LogsPipeline) json.RawMessage 
 	}
 
 	if len(pipeline.Tags) > 0 {
-		props.Tags = pipeline.Tags
+		props.Tags = sortedTags(pipeline.Tags)
 	}
 
 	// Serialize processors as raw JSON
