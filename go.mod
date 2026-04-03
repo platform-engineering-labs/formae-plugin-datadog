@@ -3,7 +3,7 @@ module github.com/platform-engineering-labs/formae-plugin-datadog
 go 1.25
 
 require (
-	github.com/DataDog/datadog-api-client-go/v2 v2.56.0
+	github.com/DataDog/datadog-api-client-go/v2 v2.57.0
 	github.com/platform-engineering-labs/formae/pkg/plugin v0.1.14
 	github.com/platform-engineering-labs/formae/pkg/plugin-conformance-tests v0.1.21
 	github.com/stretchr/testify v1.11.1
