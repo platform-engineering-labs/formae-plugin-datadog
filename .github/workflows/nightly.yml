@@ -1,0 +1,121 @@
+name: Nightly
+
+# Tests plugin against a pinned formae branch/tag to catch SDK regressions.
+# Default pins to 0.84.0 until formae main's plugin PKL wrapper generation is
+# fixed for resource plugins (tracked upstream).
+
+on:
+  schedule:
+    - cron: '0 3 * * *'  # 3 AM UTC
+  workflow_dispatch:
+    inputs:
+      formae_branch:
+        description: "Formae branch to build from (default: main)"
+        required: false
+        default: "0.84.0"
+        type: string
+
+jobs:
+  # Integration tests run against the shared Datadog test account.
+  # These are self-contained: each test creates and cleans up its own resources.
+  test-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout plugin
+        uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.26"
+
+      - name: Run integration tests
+        env:
+          DD_API_KEY: ${{ secrets.DD_API_KEY }}
+          DD_APP_KEY: ${{ secrets.DD_APP_KEY }}
+          DD_SITE: ${{ secrets.DD_SITE }}
+        run: make test-integration
+
+  conformance-tests-main:
+    needs: [test-integration]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    strategy:
+      fail-fast: false
+      matrix:
+        resource:
+          - monitor
+          - downtime-schedule
+          - slo
+          - index
+          - logs-metric
+          - pipeline
+          - role
+          - team
+          - dashboard
+          - synthetics-test
+
+    steps:
+      - name: Checkout plugin
+        uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.26"
+
+      - name: Set up Pkl
+        uses: pkl-community/setup-pkl@v0
+        with:
+          pkl-version: 0.30.0
+
+      - name: Build formae
+        run: |
+          BRANCH="${{ inputs.formae_branch || '0.84.0' }}"
+          echo "Building formae from branch: ${BRANCH}"
+          git clone --branch "${BRANCH}" --depth 1 https://github.com/platform-engineering-labs/formae.git /tmp/formae
+          cd /tmp/formae
+          git fetch --tags --unshallow
+          make build
+          echo "FORMAE_BINARY=/tmp/formae/formae" >> $GITHUB_ENV
+
+      - name: Inject formae replace directives
+        run: |
+          FORMAE_SRC=/tmp/formae
+          for pkg in pkg/auth pkg/model pkg/plugin pkg/plugin-conformance-tests; do
+            if grep -q "formae/$pkg" go.mod 2>/dev/null; then
+              echo "Injecting replace for $pkg -> $FORMAE_SRC/$pkg"
+              go mod edit -replace "github.com/platform-engineering-labs/formae/$pkg=$FORMAE_SRC/$pkg"
+            fi
+          done
+          go mod tidy
+
+      - name: Install plugin
+        run: make install
+
+      - name: Run conformance tests (${{ matrix.resource }})
+        env:
+          DD_API_KEY: ${{ secrets.DD_API_KEY }}
+          DD_APP_KEY: ${{ secrets.DD_APP_KEY }}
+          DD_SITE: ${{ secrets.DD_SITE }}
+          FORMAE_TEST_RUN_ID: nightly-${{ github.run_id }}-${{ matrix.resource }}
+          FORMAE_TEST_FILTER: ${{ matrix.resource }}
+        run: make conformance-test
+
+  # Clean up Datadog resources after all matrix jobs complete.
+  cleanup:
+    needs: [conformance-tests-main]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Checkout plugin
+        uses: actions/checkout@v6
+
+      - name: Clean up test resources
+        env:
+          DD_API_KEY: ${{ secrets.DD_API_KEY }}
+          DD_APP_KEY: ${{ secrets.DD_APP_KEY }}
+          DD_SITE: ${{ secrets.DD_SITE }}
+        run: ./scripts/ci/clean-environment.sh
