@@ -134,6 +134,18 @@ func (d *DowntimeSchedule) Read(ctx context.Context, request *resource.ReadReque
 	}
 
 	data := resp.GetData()
+
+	// Datadog doesn't hard-delete cancelled downtimes; it marks them as
+	// canceled and keeps returning them via GET. Treat as NotFound so sync
+	// correctly tombstones resources deleted out-of-band.
+	if attrs, ok := data.GetAttributesOk(); ok && attrs != nil {
+		if attrs.GetStatus() == datadogV2.DOWNTIMESTATUS_CANCELED {
+			return &resource.ReadResult{
+				ErrorCode: resource.OperationErrorCodeNotFound,
+			}, nil
+		}
+	}
+
 	propsJSON := marshalDowntimeProps(&data)
 
 	return &resource.ReadResult{
@@ -249,6 +261,13 @@ func (d *DowntimeSchedule) List(ctx context.Context, _ *resource.ListRequest) (*
 	for item := range items {
 		if item.Error != nil {
 			return nil, fmt.Errorf("failed to list downtimes: %w", item.Error)
+		}
+		// Skip cancelled downtimes — Datadog retains them in list results
+		// indefinitely, but they shouldn't appear in inventory.
+		if attrs, ok := item.Item.GetAttributesOk(); ok && attrs != nil {
+			if attrs.GetStatus() == datadogV2.DOWNTIMESTATUS_CANCELED {
+				continue
+			}
 		}
 		nativeIDs = append(nativeIDs, item.Item.GetId())
 	}

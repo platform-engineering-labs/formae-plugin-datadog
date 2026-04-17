@@ -86,28 +86,40 @@ conformance-test: conformance-test-crud conformance-test-discovery
 
 ## conformance-test-crud: Run only CRUD lifecycle tests
 ## Usage: make conformance-test-crud [VERSION=0.82.3] [TEST=monitor] [TIMEOUT=15]
+## Note: Environment cleanup is skipped when FORMAE_TEST_FILTER is set (matrix CI)
+## to avoid parallel jobs deleting each other's resources. Use a separate cleanup
+## job in the workflow instead.
 conformance-test-crud: install
-	@echo "Pre-test cleanup..."
-	@./scripts/ci/clean-environment.sh || true
-	@echo ""
+	@if [ -z "$(FORMAE_TEST_FILTER)" ] && [ -z "$(TEST)" ]; then \
+		echo "Pre-test cleanup..."; \
+		./scripts/ci/clean-environment.sh || true; \
+		echo ""; \
+	fi
 	@echo "Running CRUD conformance tests..."
-	@FORMAE_TEST_FILTER="$(TEST)" FORMAE_TEST_TYPE=crud FORMAE_TEST_TIMEOUT="$(TIMEOUT)" ./scripts/run-conformance-tests.sh $(VERSION); \
+	@FORMAE_TEST_FILTER="$(if $(TEST),$(TEST),$(FORMAE_TEST_FILTER))" FORMAE_TEST_TYPE=crud FORMAE_TEST_TIMEOUT="$(TIMEOUT)" ./scripts/run-conformance-tests.sh $(VERSION); \
 	TEST_EXIT=$$?; \
-	echo ""; \
-	echo "Post-test cleanup..."; \
-	./scripts/ci/clean-environment.sh || true; \
+	if [ -z "$(FORMAE_TEST_FILTER)" ] && [ -z "$(TEST)" ]; then \
+		echo ""; \
+		echo "Post-test cleanup..."; \
+		./scripts/ci/clean-environment.sh || true; \
+	fi; \
 	exit $$TEST_EXIT
 
 ## conformance-test-discovery: Run only discovery tests
 ## Usage: make conformance-test-discovery [VERSION=0.82.3] [TEST=monitor] [TIMEOUT=15]
+## Note: see conformance-test-crud re: cleanup gating under FORMAE_TEST_FILTER.
 conformance-test-discovery: install
-	@echo "Pre-test cleanup..."
-	@./scripts/ci/clean-environment.sh || true
-	@echo ""
+	@if [ -z "$(FORMAE_TEST_FILTER)" ] && [ -z "$(TEST)" ]; then \
+		echo "Pre-test cleanup..."; \
+		./scripts/ci/clean-environment.sh || true; \
+		echo ""; \
+	fi
 	@echo "Running discovery conformance tests..."
-	@FORMAE_TEST_FILTER="$(TEST)" FORMAE_TEST_TYPE=discovery FORMAE_TEST_TIMEOUT="$(TIMEOUT)" ./scripts/run-conformance-tests.sh $(VERSION); \
+	@FORMAE_TEST_FILTER="$(if $(TEST),$(TEST),$(FORMAE_TEST_FILTER))" FORMAE_TEST_TYPE=discovery FORMAE_TEST_TIMEOUT="$(TIMEOUT)" ./scripts/run-conformance-tests.sh $(VERSION); \
 	TEST_EXIT=$$?; \
-	echo ""; \
-	echo "Post-test cleanup..."; \
-	./scripts/ci/clean-environment.sh || true; \
+	if [ -z "$(FORMAE_TEST_FILTER)" ] && [ -z "$(TEST)" ]; then \
+		echo ""; \
+		echo "Post-test cleanup..."; \
+		./scripts/ci/clean-environment.sh || true; \
+	fi; \
 	exit $$TEST_EXIT

@@ -7,8 +7,12 @@ package resources
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
+	"strings"
 
+	"github.com/DataDog/datadog-api-client-go/v2/api/datadog"
 	"github.com/DataDog/datadog-api-client-go/v2/api/datadogV1"
 
 	"github.com/platform-engineering-labs/formae-plugin-datadog/pkg/client"
@@ -31,11 +35,11 @@ type LogsPipeline struct {
 }
 
 type logsPipelineProps struct {
-	Name       string             `json:"name"`
+	Name       string              `json:"name"`
 	Filter     *logsPipelineFilter `json:"filter,omitempty"`
-	IsEnabled  *bool              `json:"isEnabled,omitempty"`
-	Processors *string            `json:"processors,omitempty"`
-	Tags       []string           `json:"tags,omitempty"`
+	IsEnabled  *bool               `json:"isEnabled,omitempty"`
+	Processors *string             `json:"processors,omitempty"`
+	Tags       []string            `json:"tags,omitempty"`
 }
 
 type logsPipelineFilter struct {
@@ -79,6 +83,16 @@ func (l *LogsPipeline) Read(ctx context.Context, request *resource.ReadRequest) 
 	api := datadogV1.NewLogsPipelinesApi(l.Client.ApiClient)
 	resp, httpResp, err := api.GetLogsPipeline(l.Client.Ctx, request.NativeID)
 	if err != nil {
+		// Datadog's pipeline API returns 400 (not 404) when the pipeline ID
+		// doesn't exist, with body {"error":{"code":"InvalidArgument",
+		// "message":"Non existing pipeline"}}. Map this specific case to
+		// NotFound so sync can tombstone out-of-band deletes. Other 400s
+		// (malformed requests) still surface as InvalidRequest.
+		if isLogsPipelineNotFoundError(err, httpResp) {
+			return &resource.ReadResult{
+				ErrorCode: resource.OperationErrorCodeNotFound,
+			}, nil
+		}
 		return &resource.ReadResult{
 			ErrorCode: mapHTTPError(httpResp, err),
 		}, nil
@@ -230,4 +244,19 @@ func marshalLogsPipelineProps(pipeline *datadogV1.LogsPipeline) json.RawMessage 
 
 	d, _ := json.Marshal(props)
 	return d
+}
+
+// isLogsPipelineNotFoundError returns true if the error indicates the pipeline
+// ID doesn't exist. Datadog's pipeline API returns HTTP 400 with a body of
+// {"error":{"code":"InvalidArgument","message":"Non existing pipeline"}}
+// instead of 404 for this case (verified against the live API).
+func isLogsPipelineNotFoundError(err error, httpResp *http.Response) bool {
+	if httpResp == nil || httpResp.StatusCode != 400 {
+		return false
+	}
+	var ae datadog.GenericOpenAPIError
+	if !errors.As(err, &ae) {
+		return false
+	}
+	return strings.Contains(string(ae.Body()), "Non existing pipeline")
 }

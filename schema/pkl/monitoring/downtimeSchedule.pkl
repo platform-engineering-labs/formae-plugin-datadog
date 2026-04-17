@@ -65,10 +65,10 @@ open class DowntimeSchedule extends formae.Resource {
     @datadog.FieldHint {}
     message: String?
 
-    @datadog.FieldHint {}
+    @datadog.FieldHint { hasProviderDefault = true }
     muteFirstRecoveryNotification: Boolean?
 
-    @datadog.FieldHint {}
+    @datadog.FieldHint { hasProviderDefault = true }
     displayTimezone: String?
 
     @datadog.FieldHint {}

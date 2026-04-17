@@ -65,7 +65,7 @@ open class Index extends formae.Resource {
     @datadog.FieldHint {}
     dailyLimit: Int?
 
-    @datadog.FieldHint {}
+    @datadog.FieldHint { hasProviderDefault = true }
     numRetentionDays: Int?
 
     hidden parent = this
