@@ -23,7 +23,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: "1.25"
+          go-version: "1.26"
 
       - name: Set up Pkl
         uses: pkl-community/setup-pkl@v0
@@ -61,7 +61,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: "1.25"
+          go-version: "1.26"
 
       - name: Run integration tests
         env:
@@ -83,7 +83,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: "1.25"
+          go-version: "1.26"
 
       - name: Set up Pkl
         uses: pkl-community/setup-pkl@v0

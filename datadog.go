@@ -11,6 +11,7 @@ import (
 	"github.com/platform-engineering-labs/formae-plugin-datadog/pkg/client"
 	"github.com/platform-engineering-labs/formae-plugin-datadog/pkg/config"
 	"github.com/platform-engineering-labs/formae-plugin-datadog/pkg/registry"
+	pkgmodel "github.com/platform-engineering-labs/formae/pkg/model"
 	"github.com/platform-engineering-labs/formae/pkg/plugin"
 	"github.com/platform-engineering-labs/formae/pkg/plugin/resource"
 
@@ -23,19 +24,19 @@ type Plugin struct{}
 
 var _ plugin.ResourcePlugin = &Plugin{}
 
-func (p *Plugin) RateLimit() plugin.RateLimitConfig {
-	return plugin.RateLimitConfig{
-		Scope:                            plugin.RateLimitScopeNamespace,
+func (p *Plugin) RateLimit() pkgmodel.RateLimitConfig {
+	return pkgmodel.RateLimitConfig{
+		Scope:                            pkgmodel.RateLimitScopeNamespace,
 		MaxRequestsPerSecondForNamespace: 3,
 	}
 }
 
-func (p *Plugin) DiscoveryFilters() []plugin.MatchFilter {
+func (p *Plugin) DiscoveryFilters() []pkgmodel.MatchFilter {
 	return nil
 }
 
-func (p *Plugin) LabelConfig() plugin.LabelConfig {
-	return plugin.LabelConfig{
+func (p *Plugin) LabelConfig() pkgmodel.LabelConfig {
+	return pkgmodel.LabelConfig{
 		DefaultQuery: "$.name",
 	}
 }

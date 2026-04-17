@@ -1,0 +1,14 @@
+/*
+ * © 2025 Platform Engineering Labs Inc.
+ *
+ * SPDX-License-Identifier: FSL-1.1-ALv2
+ */
+
+/// Datadog plugin configuration.
+open module datadog.Config
+
+extends "formae:/Config.pkl"
+
+class PluginConfig extends BaseResourcePluginConfig {
+    type = "datadog"
+}
