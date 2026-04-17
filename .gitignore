@@ -32,3 +32,8 @@ PklProject.deps.json
 # Claude Code
 CLAUDE.md
 .claude/
+
+# Local credentials
+.env
+.envrc
+progress.md

@@ -63,3 +63,7 @@ require (
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace ergo.services/ergo => github.com/JeroenSoeters/ergo v1.999.320-pel.1
+
+replace ergo.services/actor/statemachine => github.com/JeroenSoeters/actor/statemachine v0.0.0-20260319024748-85c28f9f660b

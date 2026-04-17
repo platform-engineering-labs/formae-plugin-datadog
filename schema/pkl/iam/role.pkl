@@ -27,7 +27,7 @@ open class Role extends formae.Resource {
     @datadog.FieldHint { required = true }
     name: String
 
-    @datadog.FieldHint {}
+    @datadog.FieldHint { hasProviderDefault = true }
     permissions: Listing<String>?
 
     hidden parent = this

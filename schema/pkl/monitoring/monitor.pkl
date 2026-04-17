@@ -53,7 +53,7 @@ class MonitorOptions extends formae.SubResource {
     @formae.FieldHint {}
     escalationMessage: String?
 
-    @formae.FieldHint {}
+    @datadog.FieldHint { hasProviderDefault = true }
     includeTags: Boolean?
 }
 

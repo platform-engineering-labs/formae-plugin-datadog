@@ -8,7 +8,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"time"
 
+	"github.com/DataDog/datadog-api-client-go/v2/api/datadog"
 	"github.com/DataDog/datadog-api-client-go/v2/api/datadogV1"
 
 	"github.com/platform-engineering-labs/formae-plugin-datadog/pkg/client"
@@ -31,11 +34,11 @@ type LogsIndex struct {
 }
 
 type logsIndexProps struct {
-	Name             string              `json:"name"`
-	Filter           logsIndexFilter     `json:"filter"`
-	ExclusionFilters []logsExclusion     `json:"exclusionFilters,omitempty"`
-	DailyLimit       *int64              `json:"dailyLimit,omitempty"`
-	NumRetentionDays *int64              `json:"numRetentionDays,omitempty"`
+	Name             string          `json:"name"`
+	Filter           logsIndexFilter `json:"filter"`
+	ExclusionFilters []logsExclusion `json:"exclusionFilters,omitempty"`
+	DailyLimit       *int64          `json:"dailyLimit,omitempty"`
+	NumRetentionDays *int64          `json:"numRetentionDays,omitempty"`
 }
 
 type logsIndexFilter struct {
@@ -161,6 +164,13 @@ func (l *LogsIndex) Delete(ctx context.Context, request *resource.DeleteRequest)
 		}, nil
 	}
 
+	// Datadog's Logs Index API has cross-session eventual consistency: a GET
+	// from a different session can return the index for several seconds after
+	// a successful Delete. Poll with a fresh client (independent connection
+	// pool, so the signal isn't skewed by session affinity) until a cross
+	// session sees it as gone, so formae's sync process can tombstone.
+	waitForLogsIndexDeleteVisibility(l.Client.Ctx, request.NativeID)
+
 	return &resource.DeleteResult{
 		ProgressResult: &resource.ProgressResult{
 			Operation:       resource.OperationDelete,
@@ -168,6 +178,45 @@ func (l *LogsIndex) Delete(ctx context.Context, request *resource.DeleteRequest)
 			NativeID:        request.NativeID,
 		},
 	}, nil
+}
+
+// waitForLogsIndexDeleteVisibility polls Datadog until a fresh session sees
+// the index as deleted. Uses its own APIClient (independent connection pool
+// and no shared SDK state with the caller) so the signal reflects what any
+// other session — most importantly, the formae agent's plugin process during
+// sync — would observe. Required because Datadog's Logs Index API has a
+// multi-second cross-session eventual consistency window after Delete.
+func waitForLogsIndexDeleteVisibility(ctx context.Context, nativeID string) {
+	freshAPI := datadogV1.NewLogsIndexesApi(newFreshDatadogClient())
+
+	deadline := time.Now().Add(60 * time.Second)
+	for time.Now().Before(deadline) {
+		_, httpResp, err := freshAPI.GetLogsIndex(ctx, nativeID)
+		if err != nil && httpResp != nil && httpResp.StatusCode == 404 {
+			return // Fresh session sees it as deleted.
+		}
+		if err == nil {
+			time.Sleep(2 * time.Second)
+			continue // Fresh session still sees the index; keep waiting.
+		}
+		// Transient network/auth errors: don't block Delete on them.
+		return
+	}
+}
+
+// newFreshDatadogClient returns a new datadog.APIClient with its own HTTP
+// transport so it doesn't share connection pooling or cached DNS/TLS sessions
+// with any other client. Used to probe for eventual consistency.
+func newFreshDatadogClient() *datadog.APIClient {
+	cfg := datadog.NewConfiguration()
+	cfg.HTTPClient = &http.Client{
+		Transport: &http.Transport{
+			DisableKeepAlives:   true,
+			MaxIdleConnsPerHost: 1,
+		},
+		Timeout: 10 * time.Second,
+	}
+	return datadog.NewAPIClient(cfg)
 }
 
 func (l *LogsIndex) Status(_ context.Context, request *resource.StatusRequest) (*resource.StatusResult, error) {
