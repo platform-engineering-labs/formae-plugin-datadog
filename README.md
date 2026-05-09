@@ -22,12 +22,6 @@ Formae plugin for managing Datadog resources.
 | `Datadog::Synthetics::Test` | Synthetics API tests (discovery-first, raw JSON config) |
 | `Datadog::Logs::Pipeline` | Logs pipelines (typed fields + raw JSON processors) |
 
-## Installation
-
-```bash
-make install
-```
-
 ## Configuration
 
 Configure a Datadog target in your Forma file:
@@ -60,32 +54,6 @@ export DD_SITE="datadoghq.com"    # or us5.datadoghq.com, etc.
 See [examples/](examples/) for usage patterns:
 
 - `basic/` - CPU usage monitor with warning and critical thresholds
-
-## Development
-
-```bash
-make build          # Build plugin
-make test           # Run tests
-make install        # Install locally
-make gen-pkl        # Resolve PKL dependencies
-```
-
-## Conformance Tests
-
-Run against a real Datadog account:
-
-```bash
-make conformance-test-crud TEST=monitor
-make conformance-test-crud TEST=slo
-make conformance-test-crud TEST=downtime-schedule
-make conformance-test-crud TEST=index
-make conformance-test-crud TEST=logs-metric
-make conformance-test-crud TEST=role
-make conformance-test-crud TEST=team
-make conformance-test-crud TEST=dashboard
-make conformance-test-crud TEST=synthetics-test
-make conformance-test-crud TEST=pipeline
-```
 
 ## License
 
