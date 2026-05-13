@@ -8,7 +8,7 @@ module datadog.logs.logsMetric
 import "@formae/formae.pkl"
 import "../datadog.pkl"
 
-const type = "Datadog::Logs::Metric"
+const type = "DATADOG::Logs::Metric"
 
 open class LogsMetricResolvable extends formae.Resolvable {
     hidden type = module.type

@@ -8,7 +8,7 @@ module datadog.iam.team
 import "@formae/formae.pkl"
 import "../datadog.pkl"
 
-const type = "Datadog::IAM::Team"
+const type = "DATADOG::IAM::Team"
 
 open class TeamResolvable extends formae.Resolvable {
     hidden type = module.type

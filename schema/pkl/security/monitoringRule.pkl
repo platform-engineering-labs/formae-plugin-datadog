@@ -8,7 +8,7 @@ module datadog.security.monitoringRule
 import "@formae/formae.pkl"
 import "../datadog.pkl"
 
-const type = "Datadog::Security::MonitoringRule"
+const type = "DATADOG::Security::MonitoringRule"
 
 open class MonitoringRuleResolvable extends formae.Resolvable {
     hidden type = module.type

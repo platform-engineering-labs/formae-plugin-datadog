@@ -8,7 +8,7 @@ module datadog.iam.role
 import "@formae/formae.pkl"
 import "../datadog.pkl"
 
-const type = "Datadog::IAM::Role"
+const type = "DATADOG::IAM::Role"
 
 open class RoleResolvable extends formae.Resolvable {
     hidden type = module.type

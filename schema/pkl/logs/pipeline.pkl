@@ -8,7 +8,7 @@ module datadog.logs.pipeline
 import "@formae/formae.pkl"
 import "../datadog.pkl"
 
-const type = "Datadog::Logs::Pipeline"
+const type = "DATADOG::Logs::Pipeline"
 
 open class PipelineResolvable extends formae.Resolvable {
     hidden type = module.type

@@ -8,7 +8,7 @@ module datadog.logs.archive
 import "@formae/formae.pkl"
 import "../datadog.pkl"
 
-const type = "Datadog::Logs::Archive"
+const type = "DATADOG::Logs::Archive"
 
 open class ArchiveResolvable extends formae.Resolvable {
     hidden type = module.type

@@ -11,7 +11,7 @@ import "@formae/formae.pkl"
 /// ApiKey and AppKey are required for API authentication.
 /// Site defaults to "datadoghq.com" — override for EU or other regions.
 open class Config {
-  hidden fixed type: String = "Datadog"
+  hidden fixed type: String = "DATADOG"
   hidden apiKey: String
   hidden appKey: String
   hidden site: String = "datadoghq.com"

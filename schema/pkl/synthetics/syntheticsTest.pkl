@@ -8,7 +8,7 @@ module datadog.synthetics.syntheticsTest
 import "@formae/formae.pkl"
 import "../datadog.pkl"
 
-const type = "Datadog::Synthetics::Test"
+const type = "DATADOG::Synthetics::Test"
 
 open class SyntheticsTestResolvable extends formae.Resolvable {
     hidden type = module.type

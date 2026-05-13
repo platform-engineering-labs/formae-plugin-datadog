@@ -8,7 +8,7 @@ module datadog.monitoring.monitor
 import "@formae/formae.pkl"
 import "../datadog.pkl"
 
-const type = "Datadog::Monitoring::Monitor"
+const type = "DATADOG::Monitoring::Monitor"
 
 open class MonitorResolvable extends formae.Resolvable {
     hidden type = module.type

@@ -8,7 +8,7 @@ module datadog.monitoring.slo
 import "@formae/formae.pkl"
 import "../datadog.pkl"
 
-const type = "Datadog::Monitoring::SLO"
+const type = "DATADOG::Monitoring::SLO"
 
 open class SloResolvable extends formae.Resolvable {
     hidden type = module.type

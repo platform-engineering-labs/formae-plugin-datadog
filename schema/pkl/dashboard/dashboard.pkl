@@ -8,7 +8,7 @@ module datadog.dashboard.dashboard
 import "@formae/formae.pkl"
 import "../datadog.pkl"
 
-const type = "Datadog::Dashboard::Dashboard"
+const type = "DATADOG::Dashboard::Dashboard"
 
 open class DashboardResolvable extends formae.Resolvable {
     hidden type = module.type
