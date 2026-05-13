@@ -10,6 +10,7 @@ namespace = "DATADOG"
 description = "Datadog monitoring and observability plugin for Formae"
 license = "FSL-1.1-ALv2"
 minFormaeVersion = "0.84.0"
+category = "observability"
 
 output {
   renderer = new JsonRenderer {}
