@@ -6,7 +6,7 @@
 
 name = "datadog"
 version = "0.1.0"
-namespace = "DATADOG"
+namespace = "Datadog"
 description = "Datadog monitoring and observability plugin for Formae"
 license = "FSL-1.1-ALv2"
 minFormaeVersion = "0.84.0"
