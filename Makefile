@@ -21,6 +21,7 @@ all: build
 
 ## build: Build the plugin binary
 build:
+	@mkdir -p schema/pkl && echo "$(PLUGIN_VERSION)" > schema/pkl/VERSION
 	$(GO) build $(GOFLAGS) -o bin/$(BINARY) .
 
 ## test: Run all tests (excludes integration/conformance)
@@ -46,6 +47,7 @@ verify-schema:
 
 ## gen-pkl: Resolve all PKL project dependencies
 gen-pkl:
+	@mkdir -p schema/pkl && echo "$(PLUGIN_VERSION)" > schema/pkl/VERSION
 	pkl project resolve schema/pkl
 	pkl project resolve examples/basic
 	pkl project resolve testdata
