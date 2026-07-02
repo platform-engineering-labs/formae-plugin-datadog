@@ -1,8 +1,6 @@
 name: Nightly
 
-# Tests plugin against a pinned formae branch/tag to catch SDK regressions.
-# Default pins to 0.84.0 until formae main's plugin PKL wrapper generation is
-# fixed for resource plugins (tracked upstream).
+# Tests plugin against formae main branch to catch SDK regressions before release.
 
 on:
   schedule:
@@ -10,10 +8,28 @@ on:
   workflow_dispatch:
     inputs:
       formae_branch:
-        description: "Formae branch to build from (default: 0.84.0)"
+        description: "Formae branch to build from (default: main)"
         required: false
-        default: "0.84.0"
+        default: "main"
         type: string
+      formae_version:
+        description: |
+          Formae version baked into the binary via VERSION (also propagated to
+          plugins as FORMAE_VERSION; plugins use it to resolve their PKL formae
+          schema dep against package://...formae@<version>). Defaults to the
+          canonical X.Y.Z derived from the latest tag on the formae branch -
+          including dev tags, so a newly tagged 0.86.0-dev.N is picked up
+          automatically. Set this explicitly to test an unreleased schema that
+          has been pre-released via formae's schema-prerelease workflow but has
+          no matching tag yet (e.g. formae_version=0.86.0 while 0.85.2 is the
+          latest tag).
+        required: false
+        default: ""
+        type: string
+
+concurrency:
+  group: datadog-conformance-tests
+  cancel-in-progress: false
 
 jobs:
   # Integration tests run against the shared Datadog test account.
@@ -23,7 +39,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout plugin
-        uses: actions/checkout@v7
+        uses: actions/checkout@v6
 
       - name: Set up Go
         uses: actions/setup-go@v6
@@ -44,7 +60,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout plugin
-        uses: actions/checkout@v7
+        uses: actions/checkout@v6
 
       - name: Set up Go
         uses: actions/setup-go@v6
@@ -58,12 +74,33 @@ jobs:
 
       - name: Build formae
         run: |
-          BRANCH="${{ inputs.formae_branch || '0.84.0' }}"
+          BRANCH="${{ inputs.formae_branch || 'main' }}"
           echo "Building formae from branch: ${BRANCH}"
           git clone --branch "${BRANCH}" --depth 1 https://github.com/platform-engineering-labs/formae.git /tmp/formae
           cd /tmp/formae
           git fetch --tags --unshallow
-          make build
+          # The version baked via VERSION becomes formae.Version at runtime and
+          # is propagated to plugins as FORMAE_VERSION. Plugins use it to resolve
+          # their formae PKL dep against package://...formae@<version> on the
+          # hub, so it must match a schema that has been published. The nightly
+          # validates plugin main against formae main, so we pick the latest tag
+          # on the branch - including dev tags - since that is the most recent
+          # published schema. The canonical X.Y.Z is stripped from any -dev.N
+          # suffix to match how formae publishes schemas (a 0.86.0-dev.N release,
+          # and the schema-prerelease workflow, both publish at formae@0.86.0).
+          # An explicit formae_version input overrides this - use it to test an
+          # unreleased, pre-released schema that has no matching tag yet.
+          VERSION="${{ inputs.formae_version }}"
+          if [ -z "$VERSION" ]; then
+            LATEST_TAG=$(git tag -l "[0-9]*" --sort=-version:refname | head -1)
+            VERSION=$(echo "$LATEST_TAG" | cut -d'-' -f1)
+            echo "No formae_version input; latest tag=${LATEST_TAG}, using canonical VERSION=${VERSION}"
+          else
+            echo "Using formae_version input: ${VERSION}"
+          fi
+          echo "Building formae with VERSION=${VERSION}"
+          make build VERSION="${VERSION}"
+          /tmp/formae/formae --version
           cp /tmp/formae/formae /tmp/formae-binary
 
       - name: Inject formae replace directives
@@ -81,14 +118,14 @@ jobs:
         run: make install
 
       - name: Upload formae binary
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: formae-binary
           path: /tmp/formae-binary
           retention-days: 1
 
       - name: Upload installed plugin
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: plugin-installed
           path: ~/.pel/formae/plugins/
@@ -116,7 +153,7 @@ jobs:
 
     steps:
       - name: Checkout plugin
-        uses: actions/checkout@v7
+        uses: actions/checkout@v6
 
       - name: Set up Go
         uses: actions/setup-go@v6
@@ -129,13 +166,13 @@ jobs:
           pkl-version: 0.30.0
 
       - name: Download formae binary
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: formae-binary
           path: /tmp
 
       - name: Download installed plugin
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: plugin-installed
           path: ~/.pel/formae/plugins/
@@ -152,8 +189,7 @@ jobs:
           DD_APP_KEY: ${{ secrets.DD_APP_KEY }}
           DD_SITE: ${{ secrets.DD_SITE }}
           FORMAE_TEST_RUN_ID: nightly-${{ github.run_id }}-${{ matrix.resource }}
-          FORMAE_TEST_FILTER: ${{ matrix.resource }}
-        run: make conformance-test
+        run: make conformance-test TEST=${{ matrix.resource }}
 
   # Clean up Datadog resources after all matrix jobs complete.
   cleanup:
@@ -162,7 +198,7 @@ jobs:
     if: always()
     steps:
       - name: Checkout plugin
-        uses: actions/checkout@v7
+        uses: actions/checkout@v6
 
       - name: Clean up test resources
         env:
@@ -170,3 +206,93 @@ jobs:
           DD_APP_KEY: ${{ secrets.DD_APP_KEY }}
           DD_SITE: ${{ secrets.DD_SITE }}
         run: ./scripts/ci/clean-environment.sh
+
+  notify-fixed:
+    needs: [conformance-tests-main, cleanup]
+    runs-on: ubuntu-latest
+    if: success()
+    continue-on-error: true
+    steps:
+      - name: Check if previous run failed
+        id: check_previous
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'nightly.yml',
+              per_page: 2,
+              status: 'completed'
+            });
+            const previousRun = runs.data.workflow_runs.find(run => run.id !== context.runId);
+            if (previousRun && previousRun.conclusion === 'failure') {
+              return 'true';
+            }
+            return 'false';
+          result-encoding: string
+
+      - name: Notify Slack (Fixed)
+        if: steps.check_previous.outputs.result == 'true'
+        uses: slackapi/slack-github-action@v3.0.1
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": ":white_check_mark: Nightly fixed on ${{ github.repository }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":white_check_mark: *Nightly fixed* on `${{ github.repository }}`\n\nPlugin conformance tests now passing against formae main branch."
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": { "type": "plain_text", "text": "View Run" },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
+                  ]
+                }
+              ]
+            }
+
+  notify-failure:
+    needs: [conformance-tests-main, cleanup]
+    runs-on: ubuntu-latest
+    if: failure()
+    continue-on-error: true
+    steps:
+      - name: Notify Slack
+        uses: slackapi/slack-github-action@v3.0.1
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": ":warning: Nightly build failed on ${{ github.repository }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":warning: *Nightly build failed* on `${{ github.repository }}`\n\nPlugin conformance tests failed against formae main branch. This may indicate an SDK regression."
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": { "type": "plain_text", "text": "View Run" },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
+                  ]
+                }
+              ]
+            }
