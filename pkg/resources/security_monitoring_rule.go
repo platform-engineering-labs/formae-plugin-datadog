@@ -18,7 +18,7 @@ import (
 	"github.com/platform-engineering-labs/formae/pkg/plugin/resource"
 )
 
-const ResourceTypeSecurityMonitoringRule = "Datadog::Security::MonitoringRule"
+const ResourceTypeSecurityMonitoringRule = "DATADOG::Security::MonitoringRule"
 
 func init() {
 	registry.Register(ResourceTypeSecurityMonitoringRule, func(c *client.Client, cfg *config.Config) prov.Provisioner {

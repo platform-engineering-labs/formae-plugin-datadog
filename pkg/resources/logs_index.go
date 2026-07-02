@@ -21,7 +21,7 @@ import (
 	"github.com/platform-engineering-labs/formae/pkg/plugin/resource"
 )
 
-const ResourceTypeLogsIndex = "Datadog::Logs::Index"
+const ResourceTypeLogsIndex = "DATADOG::Logs::Index"
 
 func init() {
 	registry.Register(ResourceTypeLogsIndex, func(c *client.Client, cfg *config.Config) prov.Provisioner {

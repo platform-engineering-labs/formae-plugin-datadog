@@ -19,7 +19,7 @@ import (
 	"github.com/platform-engineering-labs/formae/pkg/plugin/resource"
 )
 
-const ResourceTypeSLO = "Datadog::Monitoring::SLO"
+const ResourceTypeSLO = "DATADOG::Monitoring::SLO"
 
 func init() {
 	registry.Register(ResourceTypeSLO, func(c *client.Client, cfg *config.Config) prov.Provisioner {

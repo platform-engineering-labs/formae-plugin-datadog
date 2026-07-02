@@ -18,7 +18,7 @@ import (
 	"github.com/platform-engineering-labs/formae/pkg/plugin/resource"
 )
 
-const ResourceTypeSyntheticsTest = "Datadog::Synthetics::Test"
+const ResourceTypeSyntheticsTest = "DATADOG::Synthetics::Test"
 
 func init() {
 	registry.Register(ResourceTypeSyntheticsTest, func(c *client.Client, cfg *config.Config) prov.Provisioner {

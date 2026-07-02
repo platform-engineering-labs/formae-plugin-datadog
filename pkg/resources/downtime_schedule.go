@@ -19,7 +19,7 @@ import (
 	"github.com/platform-engineering-labs/formae/pkg/plugin/resource"
 )
 
-const ResourceTypeDowntimeSchedule = "Datadog::Monitoring::DowntimeSchedule"
+const ResourceTypeDowntimeSchedule = "DATADOG::Monitoring::DowntimeSchedule"
 
 func init() {
 	registry.Register(ResourceTypeDowntimeSchedule, func(c *client.Client, cfg *config.Config) prov.Provisioner {

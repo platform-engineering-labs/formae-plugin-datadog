@@ -18,7 +18,7 @@ import (
 	"github.com/platform-engineering-labs/formae/pkg/plugin/resource"
 )
 
-const ResourceTypeTeam = "Datadog::IAM::Team"
+const ResourceTypeTeam = "DATADOG::IAM::Team"
 
 func init() {
 	registry.Register(ResourceTypeTeam, func(c *client.Client, cfg *config.Config) prov.Provisioner {
