@@ -118,7 +118,7 @@ func TestSyntheticsTest_Update(t *testing.T) {
 	nativeID := createResult.ProgressResult.NativeID
 	t.Cleanup(func() { deleteSyntheticsTest(ctx, prov, nativeID) })
 
-	// Update — change message
+	// Update - change message
 	desiredProps, _ := json.Marshal(syntheticsTestProps{
 		Name:      name,
 		TestType:  "api",

@@ -95,7 +95,7 @@ func TestTeam_Update(t *testing.T) {
 	nativeID := createResult.ProgressResult.NativeID
 	t.Cleanup(func() { deleteTeam(ctx, prov, nativeID) })
 
-	// Update — change name and description
+	// Update - change name and description
 	desc := "Updated description"
 	desiredProps, _ := json.Marshal(teamProps{
 		Name:        "Formae Integration Test Updated",
@@ -177,7 +177,7 @@ func TestTeam_DeleteAlreadyDeleted(t *testing.T) {
 	_, err = prov.Delete(ctx, &resource.DeleteRequest{NativeID: nativeID})
 	require.NoError(t, err)
 
-	// Delete again — should succeed (idempotent)
+	// Delete again - should succeed (idempotent)
 	deleteResult, err := prov.Delete(ctx, &resource.DeleteRequest{NativeID: nativeID})
 	require.NoError(t, err)
 	assert.Equal(t, resource.OperationStatusSuccess, deleteResult.ProgressResult.OperationStatus)

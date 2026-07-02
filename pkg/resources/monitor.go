@@ -215,7 +215,7 @@ func (m *Monitor) Delete(ctx context.Context, request *resource.DeleteRequest) (
 }
 
 func (m *Monitor) Status(_ context.Context, request *resource.StatusRequest) (*resource.StatusResult, error) {
-	// Monitor operations are synchronous — no async polling needed.
+	// Monitor operations are synchronous - no async polling needed.
 	return &resource.StatusResult{
 		ProgressResult: &resource.ProgressResult{
 			Operation:       resource.OperationCheckStatus,

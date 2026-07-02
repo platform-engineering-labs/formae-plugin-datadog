@@ -34,12 +34,12 @@ func deleteLogsIndex(ctx context.Context, prov *LogsIndex, nativeID string) {
 }
 
 // waitForIndexPropagation waits for an index to become available after creation.
-// Datadog Logs Index API has eventual consistency — newly created indexes
+// Datadog Logs Index API has eventual consistency - newly created indexes
 // take a few seconds to become readable.
 func waitForIndexPropagation(t *testing.T, ctx context.Context, prov *LogsIndex, nativeID string) {
 	t.Helper()
 	// Require multiple consecutive successful reads to confirm propagation.
-	// The Datadog Logs Index API has severe eventual consistency — a read can
+	// The Datadog Logs Index API has severe eventual consistency - a read can
 	// succeed once and then fail on the very next call.
 	consecutiveOK := 0
 	for i := 0; i < 15; i++ {
@@ -156,7 +156,7 @@ func TestLogsIndex_Update(t *testing.T) {
 		deleteLogsIndex(ctx, prov, spareID)
 	})
 
-	// Update — change filter and add exclusion
+	// Update - change filter and add exclusion
 	desiredProps, _ := json.Marshal(logsIndexProps{
 		Name: name,
 		Filter: logsIndexFilter{
@@ -217,7 +217,7 @@ func TestLogsIndex_List(t *testing.T) {
 		deleteLogsIndex(ctx, prov, spareID)
 	})
 
-	// Retry List — Datadog Logs Index API has eventual consistency,
+	// Retry List - Datadog Logs Index API has eventual consistency,
 	// so the newly created index may take a few seconds to appear.
 	var found bool
 	var listResult *resource.ListResult
@@ -268,7 +268,7 @@ func TestLogsIndex_DeleteAlreadyDeleted(t *testing.T) {
 	_, err = prov.Delete(ctx, &resource.DeleteRequest{NativeID: nativeID})
 	require.NoError(t, err)
 
-	// Delete again — should succeed (idempotent)
+	// Delete again - should succeed (idempotent)
 	deleteResult, err := prov.Delete(ctx, &resource.DeleteRequest{NativeID: nativeID})
 	require.NoError(t, err)
 	assert.Equal(t, resource.OperationStatusSuccess, deleteResult.ProgressResult.OperationStatus)

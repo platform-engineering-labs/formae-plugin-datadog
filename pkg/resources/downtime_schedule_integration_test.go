@@ -111,7 +111,7 @@ func TestDowntimeSchedule_Update(t *testing.T) {
 	nativeID := createResult.ProgressResult.NativeID
 	t.Cleanup(func() { deleteDowntime(ctx, prov, nativeID) })
 
-	// Update — only change non-schedule fields (scope, message).
+	// Update - only change non-schedule fields (scope, message).
 	// Datadog rejects schedule changes on in-progress downtimes with
 	// "Start times of downtimes in progress cannot be changed".
 	desiredProps, _ := json.Marshal(downtimeProps{
@@ -168,7 +168,7 @@ func TestDowntimeSchedule_List(t *testing.T) {
 	nativeID := createResult.ProgressResult.NativeID
 	t.Cleanup(func() { deleteDowntime(ctx, prov, nativeID) })
 
-	// Retry List — Datadog API has eventual consistency,
+	// Retry List - Datadog API has eventual consistency,
 	// so the newly created downtime may take a moment to appear.
 	var found bool
 	var listResult *resource.ListResult
@@ -219,7 +219,7 @@ func TestDowntimeSchedule_DeleteAlreadyDeleted(t *testing.T) {
 	_, err = prov.Delete(ctx, &resource.DeleteRequest{NativeID: nativeID})
 	require.NoError(t, err)
 
-	// Cancel again — should succeed (idempotent)
+	// Cancel again - should succeed (idempotent)
 	deleteResult, err := prov.Delete(ctx, &resource.DeleteRequest{NativeID: nativeID})
 	require.NoError(t, err)
 	assert.Equal(t, resource.OperationStatusSuccess, deleteResult.ProgressResult.OperationStatus)

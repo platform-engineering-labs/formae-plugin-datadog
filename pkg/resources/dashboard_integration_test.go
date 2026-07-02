@@ -95,7 +95,7 @@ func TestDashboard_Update(t *testing.T) {
 	nativeID := createResult.ProgressResult.NativeID
 	t.Cleanup(func() { deleteDashboard(ctx, prov, nativeID) })
 
-	// Update — change title and add description
+	// Update - change title and add description
 	desc := "Updated dashboard"
 	desiredProps, _ := json.Marshal(dashboardProps{
 		Title:       title + "-updated",

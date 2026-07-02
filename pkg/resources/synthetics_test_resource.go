@@ -77,6 +77,10 @@ func (s *SyntheticsTest) Create(ctx context.Context, request *resource.CreateReq
 	}
 
 	nativeID := resp.GetPublicId()
+	// Persist the authored config/options, not the POST echo: the echo carries
+	// server-injected defaults that GET omits, so sync would see phantom drift.
+	resp.Config = body.Config
+	resp.Options = body.Options
 	propsJSON := marshalSyntheticsAPITestProps(&resp)
 
 	return &resource.CreateResult{
@@ -141,6 +145,9 @@ func (s *SyntheticsTest) Update(ctx context.Context, request *resource.UpdateReq
 		}, nil
 	}
 
+	// Same as Create: persist authored config/options, not the PUT echo.
+	resp.Config = body.Config
+	resp.Options = body.Options
 	propsJSON := marshalSyntheticsAPITestProps(&resp)
 
 	return &resource.UpdateResult{

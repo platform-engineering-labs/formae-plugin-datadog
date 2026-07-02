@@ -235,7 +235,7 @@ func (s *SLO) Delete(ctx context.Context, request *resource.DeleteRequest) (*res
 }
 
 func (s *SLO) Status(_ context.Context, request *resource.StatusRequest) (*resource.StatusResult, error) {
-	// SLO operations are synchronous — no async polling needed.
+	// SLO operations are synchronous - no async polling needed.
 	return &resource.StatusResult{
 		ProgressResult: &resource.ProgressResult{
 			Operation:       resource.OperationCheckStatus,
