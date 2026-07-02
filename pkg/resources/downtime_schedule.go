@@ -19,7 +19,7 @@ import (
 	"github.com/platform-engineering-labs/formae/pkg/plugin/resource"
 )
 
-const ResourceTypeDowntimeSchedule = "Datadog::Monitoring::DowntimeSchedule"
+const ResourceTypeDowntimeSchedule = "DATADOG::Monitoring::DowntimeSchedule"
 
 func init() {
 	registry.Register(ResourceTypeDowntimeSchedule, func(c *client.Client, cfg *config.Config) prov.Provisioner {
@@ -243,7 +243,7 @@ func (d *DowntimeSchedule) Delete(ctx context.Context, request *resource.DeleteR
 }
 
 func (d *DowntimeSchedule) Status(_ context.Context, request *resource.StatusRequest) (*resource.StatusResult, error) {
-	// Downtime operations are synchronous — no async polling needed.
+	// Downtime operations are synchronous - no async polling needed.
 	return &resource.StatusResult{
 		ProgressResult: &resource.ProgressResult{
 			Operation:       resource.OperationCheckStatus,
@@ -262,7 +262,7 @@ func (d *DowntimeSchedule) List(ctx context.Context, _ *resource.ListRequest) (*
 		if item.Error != nil {
 			return nil, fmt.Errorf("failed to list downtimes: %w", item.Error)
 		}
-		// Skip cancelled downtimes — Datadog retains them in list results
+		// Skip cancelled downtimes - Datadog retains them in list results
 		// indefinitely, but they shouldn't appear in inventory.
 		if attrs, ok := item.Item.GetAttributesOk(); ok && attrs != nil {
 			if attrs.GetStatus() == datadogV2.DOWNTIMESTATUS_CANCELED {

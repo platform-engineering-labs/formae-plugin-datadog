@@ -18,7 +18,7 @@ import (
 	"github.com/platform-engineering-labs/formae/pkg/plugin/resource"
 )
 
-const ResourceTypeRole = "Datadog::IAM::Role"
+const ResourceTypeRole = "DATADOG::IAM::Role"
 
 func init() {
 	registry.Register(ResourceTypeRole, func(c *client.Client, cfg *config.Config) prov.Provisioner {

@@ -21,7 +21,7 @@ import (
 	"github.com/platform-engineering-labs/formae/pkg/plugin/resource"
 )
 
-const ResourceTypeLogsIndex = "Datadog::Logs::Index"
+const ResourceTypeLogsIndex = "DATADOG::Logs::Index"
 
 func init() {
 	registry.Register(ResourceTypeLogsIndex, func(c *client.Client, cfg *config.Config) prov.Provisioner {
@@ -183,8 +183,8 @@ func (l *LogsIndex) Delete(ctx context.Context, request *resource.DeleteRequest)
 // waitForLogsIndexDeleteVisibility polls Datadog until a fresh session sees
 // the index as deleted. Uses its own APIClient (independent connection pool
 // and no shared SDK state with the caller) so the signal reflects what any
-// other session — most importantly, the formae agent's plugin process during
-// sync — would observe. Required because Datadog's Logs Index API has a
+// other session - most importantly, the formae agent's plugin process during
+// sync - would observe. Required because Datadog's Logs Index API has a
 // multi-second cross-session eventual consistency window after Delete.
 func waitForLogsIndexDeleteVisibility(ctx context.Context, nativeID string) {
 	freshAPI := datadogV1.NewLogsIndexesApi(newFreshDatadogClient())

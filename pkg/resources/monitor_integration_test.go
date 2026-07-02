@@ -125,7 +125,7 @@ func TestMonitor_CreateReadDeleteLifecycle(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, resource.OperationStatusSuccess, deleteResult.ProgressResult.OperationStatus)
 
-	// Verify gone — Read returns (result, nil) with ErrorCode set, not (nil, error)
+	// Verify gone - Read returns (result, nil) with ErrorCode set, not (nil, error)
 	goneResult, err := prov.Read(ctx, &resource.ReadRequest{
 		NativeID:     nativeID,
 		ResourceType: ResourceTypeMonitor,
@@ -257,7 +257,7 @@ func TestMonitor_DeleteAlreadyDeleted(t *testing.T) {
 	_, err = prov.Delete(ctx, &resource.DeleteRequest{NativeID: nativeID})
 	require.NoError(t, err)
 
-	// Delete again — should succeed (idempotent)
+	// Delete again - should succeed (idempotent)
 	deleteResult, err := prov.Delete(ctx, &resource.DeleteRequest{NativeID: nativeID})
 	require.NoError(t, err)
 	assert.Equal(t, resource.OperationStatusSuccess, deleteResult.ProgressResult.OperationStatus)

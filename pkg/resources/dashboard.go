@@ -18,7 +18,7 @@ import (
 	"github.com/platform-engineering-labs/formae/pkg/plugin/resource"
 )
 
-const ResourceTypeDashboard = "Datadog::Dashboard::Dashboard"
+const ResourceTypeDashboard = "DATADOG::Dashboard::Dashboard"
 
 func init() {
 	registry.Register(ResourceTypeDashboard, func(c *client.Client, cfg *config.Config) prov.Provisioner {

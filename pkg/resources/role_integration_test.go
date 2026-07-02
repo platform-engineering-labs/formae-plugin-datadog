@@ -92,7 +92,7 @@ func TestRole_Update(t *testing.T) {
 	nativeID := createResult.ProgressResult.NativeID
 	t.Cleanup(func() { deleteRole(ctx, prov, nativeID) })
 
-	// Update — change name
+	// Update - change name
 	newName := name + "-updated"
 	desiredProps, _ := json.Marshal(roleProps{
 		Name: newName,
@@ -173,7 +173,7 @@ func TestRole_DeleteAlreadyDeleted(t *testing.T) {
 	_, err = prov.Delete(ctx, &resource.DeleteRequest{NativeID: nativeID})
 	require.NoError(t, err)
 
-	// Delete again — should succeed (idempotent)
+	// Delete again - should succeed (idempotent)
 	deleteResult, err := prov.Delete(ctx, &resource.DeleteRequest{NativeID: nativeID})
 	require.NoError(t, err)
 	assert.Equal(t, resource.OperationStatusSuccess, deleteResult.ProgressResult.OperationStatus)

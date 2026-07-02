@@ -33,12 +33,12 @@ func deleteSecMonRule(ctx context.Context, prov *SecurityMonitoringRule, nativeI
 }
 
 // skipIfSecMonUnavailable checks if the Create result indicates the Security
-// Monitoring feature is unavailable (403 — requires paid add-on) and skips the test.
+// Monitoring feature is unavailable (403 - requires paid add-on) and skips the test.
 func skipIfSecMonUnavailable(t *testing.T, result *resource.CreateResult) {
 	t.Helper()
 	if result.ProgressResult.OperationStatus == resource.OperationStatusFailure &&
 		result.ProgressResult.ErrorCode == resource.OperationErrorCodeAccessDenied {
-		t.Skip("Security Monitoring requires a paid Datadog add-on — skipping")
+		t.Skip("Security Monitoring requires a paid Datadog add-on - skipping")
 	}
 }
 
@@ -140,7 +140,7 @@ func TestSecurityMonitoringRule_Update(t *testing.T) {
 	nativeID := createResult.ProgressResult.NativeID
 	t.Cleanup(func() { deleteSecMonRule(ctx, prov, nativeID) })
 
-	// Update — change message and add tag
+	// Update - change message and add tag
 	desiredProps, _ := json.Marshal(secMonRuleProps{
 		Name:      name,
 		Message:   "Updated message",
@@ -177,12 +177,12 @@ func TestSecurityMonitoringRule_List(t *testing.T) {
 	ctx := context.Background()
 	prov := newTestSecurityMonitoringRule(t)
 
-	// Just verify List works — the account may have default rules
+	// Just verify List works - the account may have default rules
 	listResult, err := prov.List(ctx, &resource.ListRequest{
 		ResourceType: ResourceTypeSecurityMonitoringRule,
 	})
 	if err != nil {
-		t.Skip("Security Monitoring requires a paid Datadog add-on — skipping")
+		t.Skip("Security Monitoring requires a paid Datadog add-on - skipping")
 	}
 	// Datadog accounts have default security rules
 	t.Logf("List returned %d security monitoring rules", len(listResult.NativeIDs))
@@ -224,7 +224,7 @@ func TestSecurityMonitoringRule_DeleteAlreadyDeleted(t *testing.T) {
 	_, err = prov.Delete(ctx, &resource.DeleteRequest{NativeID: nativeID})
 	require.NoError(t, err)
 
-	// Delete again — should succeed (idempotent)
+	// Delete again - should succeed (idempotent)
 	deleteResult, err := prov.Delete(ctx, &resource.DeleteRequest{NativeID: nativeID})
 	require.NoError(t, err)
 	assert.Equal(t, resource.OperationStatusSuccess, deleteResult.ProgressResult.OperationStatus)

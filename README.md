@@ -9,18 +9,18 @@ Formae plugin for managing Datadog resources.
 
 | Resource Type | Description |
 |---------------|-------------|
-| `Datadog::Monitoring::Monitor` | Monitors (metric, query, composite alerts) |
-| `Datadog::Monitoring::SLO` | Service Level Objectives (metric, monitor types) |
-| `Datadog::Monitoring::DowntimeSchedule` | Downtime schedules (one-time, recurring) |
-| `Datadog::Logs::Index` | Logs indexes (filter, exclusion filters, retention) |
-| `Datadog::Logs::Metric` | Log-based metrics (count, distribution aggregations) |
-| `Datadog::Logs::Archive` | Logs archives (S3, GCS, Azure destinations) |
-| `Datadog::IAM::Role` | Custom roles with permission management |
-| `Datadog::IAM::Team` | Teams (name, handle, description) |
-| `Datadog::Security::MonitoringRule` | Security monitoring detection rules |
-| `Datadog::Dashboard::Dashboard` | Dashboards (discovery-first, raw JSON widgets) |
-| `Datadog::Synthetics::Test` | Synthetics API tests (discovery-first, raw JSON config) |
-| `Datadog::Logs::Pipeline` | Logs pipelines (typed fields + raw JSON processors) |
+| `DATADOG::Monitoring::Monitor` | Monitors (metric, query, composite alerts) |
+| `DATADOG::Monitoring::SLO` | Service Level Objectives (metric, monitor types) |
+| `DATADOG::Monitoring::DowntimeSchedule` | Downtime schedules (one-time, recurring) |
+| `DATADOG::Logs::Index` | Logs indexes (filter, exclusion filters, retention) |
+| `DATADOG::Logs::Metric` | Log-based metrics (count, distribution aggregations) |
+| `DATADOG::Logs::Archive` | Logs archives (S3, GCS, Azure destinations) |
+| `DATADOG::IAM::Role` | Custom roles with permission management |
+| `DATADOG::IAM::Team` | Teams (name, handle, description) |
+| `DATADOG::Security::MonitoringRule` | Security monitoring detection rules |
+| `DATADOG::Dashboard::Dashboard` | Dashboards (discovery-first, raw JSON widgets) |
+| `DATADOG::Synthetics::Test` | Synthetics API tests (discovery-first, raw JSON config) |
+| `DATADOG::Logs::Pipeline` | Logs pipelines (typed fields + raw JSON processors) |
 
 ## Configuration
 

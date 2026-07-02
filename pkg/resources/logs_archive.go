@@ -18,7 +18,7 @@ import (
 	"github.com/platform-engineering-labs/formae/pkg/plugin/resource"
 )
 
-const ResourceTypeLogsArchive = "Datadog::Logs::Archive"
+const ResourceTypeLogsArchive = "DATADOG::Logs::Archive"
 
 func init() {
 	registry.Register(ResourceTypeLogsArchive, func(c *client.Client, cfg *config.Config) prov.Provisioner {

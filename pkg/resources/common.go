@@ -14,7 +14,7 @@ import (
 )
 
 // mapHTTPError maps HTTP response status codes to formae OperationErrorCode.
-// Datadog SDK returns (result, *http.Response, error) tuples — the response
+// Datadog SDK returns (result, *http.Response, error) tuples - the response
 // provides the most reliable status code for error classification.
 func mapHTTPError(resp *http.Response, err error) resource.OperationErrorCode {
 	if err == nil {
@@ -70,7 +70,7 @@ func parseISO8601(s string) (time.Time, error) {
 }
 
 // sortedTags returns a sorted copy of tags. Datadog returns tags in
-// arbitrary order, but formae compares properties as JSON strings —
+// arbitrary order, but formae compares properties as JSON strings -
 // non-deterministic order causes spurious "change detected" rejections.
 func sortedTags(tags []string) []string {
 	if len(tags) == 0 {

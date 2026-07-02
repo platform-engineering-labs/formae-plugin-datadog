@@ -18,7 +18,7 @@ import (
 	"github.com/platform-engineering-labs/formae/pkg/plugin/resource"
 )
 
-const ResourceTypeMonitor = "Datadog::Monitoring::Monitor"
+const ResourceTypeMonitor = "DATADOG::Monitoring::Monitor"
 
 func init() {
 	registry.Register(ResourceTypeMonitor, func(c *client.Client, cfg *config.Config) prov.Provisioner {
@@ -215,7 +215,7 @@ func (m *Monitor) Delete(ctx context.Context, request *resource.DeleteRequest) (
 }
 
 func (m *Monitor) Status(_ context.Context, request *resource.StatusRequest) (*resource.StatusResult, error) {
-	// Monitor operations are synchronous — no async polling needed.
+	// Monitor operations are synchronous - no async polling needed.
 	return &resource.StatusResult{
 		ProgressResult: &resource.ProgressResult{
 			Operation:       resource.OperationCheckStatus,

@@ -101,7 +101,7 @@ func TestLogsPipeline_Update(t *testing.T) {
 	nativeID := createResult.ProgressResult.NativeID
 	t.Cleanup(func() { deleteLogsPipeline(ctx, prov, nativeID) })
 
-	// Update — change filter
+	// Update - change filter
 	newQuery := "source:test OR source:api"
 	desiredProps, _ := json.Marshal(logsPipelineProps{
 		Name:      name,
