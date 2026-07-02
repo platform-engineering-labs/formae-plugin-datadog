@@ -138,6 +138,9 @@ jobs:
 
     strategy:
       fail-fast: false
+      # Serialize: each job cleans the shared account by prefix pre/post run,
+      # which would delete other jobs' in-flight resources.
+      max-parallel: 1
       matrix:
         resource:
           - monitor
