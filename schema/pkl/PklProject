@@ -2,9 +2,9 @@ amends "pkl:Project"
 
 package {
   name = "datadog"
-  baseUri = "package://localhost/plugins/datadog/schema/pkl/datadog"
-  version = "0.1.0"
-  packageZipUrl = "https://localhost/plugins/datadog/schema/pkl/datadog@\(version).zip"
+  baseUri = "package://hub.platform.engineering/plugins/datadog/schema/pkl/\(name)/\(name)"
+  version = read("VERSION").text.trim()
+  packageZipUrl = "https://hub.platform.engineering/plugins/datadog/schema/pkl/\(name)/\(name)@\(version).zip"
 }
 
 dependencies {
