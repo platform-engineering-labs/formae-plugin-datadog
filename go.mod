@@ -6,7 +6,7 @@ require (
 	github.com/DataDog/datadog-api-client-go/v2 v2.61.0
 	github.com/platform-engineering-labs/formae/pkg/model v0.1.23
 	github.com/platform-engineering-labs/formae/pkg/plugin v0.3.0
-	github.com/platform-engineering-labs/formae/pkg/plugin-conformance-tests v0.2.5
+	github.com/platform-engineering-labs/formae/pkg/plugin-conformance-tests v0.2.6
 	github.com/stretchr/testify v1.11.1
 )
 
