@@ -34,14 +34,26 @@ new formae.Target {
     label = "datadog-target"
     namespace = "DATADOG"
     config = new datadog.Config {
-        apiKey = read("env:DD_API_KEY")
-        appKey = read("env:DD_APP_KEY")
-        site = read("env:DD_SITE")
+        apiKey = datadogApiKey.res.secretValue
+        appKey = datadogAppKey.res.secretValue
+        site = "datadoghq.com"
     }
 }
 ```
 
-Authentication uses Datadog API and Application keys:
+### Authentication
+
+Both keys accept a resolvable, so they can be sourced from a formae-managed
+secret as above. The agent resolves them live before every call, so onboarding
+an account or rotating a key needs no agent restart, and the key is stored as a
+reference rather than sitting in the target config.
+
+A declared key is used as given: one that resolves to an empty value is an
+error rather than a silent fall back, which would otherwise authenticate as
+whoever the environment names.
+
+Each key falls back independently, so omit either one to take it from the
+environment instead:
 
 ```bash
 export DD_API_KEY="your-api-key"

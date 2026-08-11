@@ -8,6 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Install with `sudo formae plugin install datadog` on the host that runs the
 formae agent.
 
+## [0.1.2]
+
+### Added
+
+- The API and application keys accept a resolvable, so they can be sourced from
+  a formae-managed secret. The agent resolves them live before every call, so
+  onboarding an account or rotating a key needs no agent restart, and the key is
+  stored as a reference rather than sitting in the target config.
+- Both keys now fall back to `DD_API_KEY` and `DD_APP_KEY` at call time, which
+  the plugin previously did not do. Each falls back independently, so one key
+  may come from a secret while the other stays in the environment.
+- A missing key is now reported when the client is built, naming both the target
+  config field and the environment variable, instead of surfacing later as an
+  unexplained authorization failure from Datadog.
+
+### Changed
+
+- `apiKey` and `appKey` are optional, since either can now come from the
+  environment, and both are declared mutable so rotating a key updates the
+  target rather than replacing it.
+- Requires formae 0.89.0 or later, which resolves references in target config.
+
 ## [0.1.1]
 
 ### Changed
