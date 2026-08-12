@@ -22,9 +22,10 @@ forma {
   new formae.Target {
     label = "datadog-target"
     namespace = "DATADOG"
+    // Keys are deliberately omitted here so this case covers the plugin
+    // resolving them from DD_API_KEY and DD_APP_KEY at call time. The other
+    // cases declare them in the target config and cover that path.
     config = new datadog.Config {
-      apiKey = read("env:DD_API_KEY")
-      appKey = read("env:DD_APP_KEY")
       site = read("env:DD_SITE")
     }
   }

@@ -8,17 +8,42 @@ module datadog
 import "@formae/formae.pkl"
 
 /// Datadog target configuration.
-/// ApiKey and AppKey are required for API authentication.
-/// Site defaults to "datadoghq.com" — override for EU or other regions.
+///
+/// The API and application keys can be supplied in two ways:
+///   1. Here, where both accept a resolvable and so can be sourced from a
+///      formae-managed secret:
+///        apiKey = datadogApiKey.res.secretValue
+///   2. Via the DD_API_KEY and DD_APP_KEY environment variables, used for
+///      whichever key is not declared here.
+///
+/// Site defaults to "datadoghq.com". Override it for EU or other regions.
 open class Config {
   hidden fixed type: String = "DATADOG"
-  hidden apiKey: String
-  hidden appKey: String
+
+  /// The Datadog API key. Accepts a literal string or a resolvable (e.g.
+  /// sourced from a formae-managed secret, which the agent resolves live on
+  /// every call, so rotating it needs no agent restart).
+  ///
+  /// When set it is used as given: a key that resolves to an empty value is an
+  /// error rather than a silent fall back to DD_API_KEY, which would
+  /// authenticate as whoever that names. Omit it to use the environment.
+  ///
+  /// Mutable, like `appKey`: how the agent authenticates is not where the
+  /// monitors and dashboards live, so rotating a key updates the target rather
+  /// than replacing it.
+  @formae.ConfigFieldHint { createOnly = false }
+  hidden apiKey: (String|formae.Resolvable)?
+
+  /// The Datadog application key. Accepts a literal string or a resolvable,
+  /// and falls back to DD_APP_KEY on the same terms as `apiKey`.
+  @formae.ConfigFieldHint { createOnly = false }
+  hidden appKey: (String|formae.Resolvable)?
+
   hidden site: String = "datadoghq.com"
 
   fixed Type: String = type
-  fixed ApiKey: String = apiKey
-  fixed AppKey: String = appKey
+  fixed ApiKey: (String|formae.Resolvable)? = apiKey
+  fixed AppKey: (String|formae.Resolvable)? = appKey
   fixed Site: String = site
 }
 
